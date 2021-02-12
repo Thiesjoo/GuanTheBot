@@ -21,21 +21,6 @@ const users = ["koepoe_", "xhatios", "guanthethird", "hiervandaan", "thedejavunl
 const reactions = ["Lastig he typen?", "LEER NOU EENS TYPEN", "catJAM still can't type", "Poggies kan je nou nog steeds niet typen"]
 const triggers = ["SAdge", "Saadge", "pepD", "ppeD", "SAadge", "peepd", "peepD", "PEPEd", "peped", "poggies", "PepeD", "kekw", "Dadge", "Sadge\\", "KEKw", "#Head", "5head", "MadestNo", "sadge", "Sadhe", "3head", "<3*", "<#"]
 
-// function getCurrentDateString() {
-//     var dateObj = new Date();
-//     var month = dateObj.getUTCMonth() + 1; //months from 1-12
-//     var day = dateObj.getUTCDate();
-//     var year = dateObj.getUTCFullYear();
-
-//     return year + "-" + month + "-" + day + ".json";
-// }
-
-// let fileName = getCurrentDateString()
-
-// let commands = {}
-// if (fs.existsSync(fileName)) {
-//     commands = JSON.parse(fs.readFileSync(fileName, 'utf8'))
-// }
 
 client.connect()
     .then(_ => {
@@ -46,7 +31,6 @@ client.connect()
 
 
 client.on('message', (channel, tags, message, self) => {
-    // console.log(channel, tags, message)
     if (self) return;
     if (users.includes(tags.username)) {
         if (triggers.some((x) => message.includes(x))) {
@@ -62,23 +46,4 @@ client.on('message', (channel, tags, message, self) => {
             client.say(channel, "EZY Clap")
         }
     }
-
-
-    // const total = message.toLowerCase();
-
-    // if (total == "!save") {
-    //     fs.writeFile(fileName, JSON.stringify(commands), (err) => {
-    //         if (err) {
-    //             throw err;
-    //         }
-    //         console.log("JSON data is saved.");
-    //     });
-    // } else if (total == "!show") {
-    //     console.log(commands)
-    // } else if (message[0] === "!") {
-    //     let com = message.split(" ")[0].toLowerCase()
-    //     if (!(com in commands)) commands[com] = 0
-    //     commands[com] += 1
-    //     console.log("Command used!: ", com)
-    // }
 });
