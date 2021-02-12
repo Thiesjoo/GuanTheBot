@@ -1,0 +1,18 @@
+{
+	"name": "TwitchTestingBot",
+	"dockerComposeFile": "docker-compose.yml",
+	"shutdownAction": "stopCompose",
+	"service": "bot",
+	"settings": {
+		"terminal.integrated.shell.linux": "/bin/zsh"
+	},
+	"extensions": [
+		"dbaeumer.vscode-eslint",
+		"esbenp.prettier-vscode",
+		"mongodb.mongodb-vscode",
+		"eamodio.gitlens"
+	],
+	"postCreateCommand": "npm ci",
+	"remoteUser": "vscode",
+	"workspaceFolder": "/workspace"
+}
