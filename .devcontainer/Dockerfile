@@ -2,7 +2,7 @@ FROM alpine:3.13
 ARG USERNAME=vscode
 
 # Packages
-RUN apk add zsh git openssh gnupg nodejs curl libgcc libstdc++  --no-cache
+RUN apk add zsh git openssh gnupg nodejs curl libgcc libstdc++ npm --no-cache
 
 # User
 RUN  adduser --shell /bin/zsh --uid 1000 --disabled-password $USERNAME  && \

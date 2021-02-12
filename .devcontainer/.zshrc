@@ -4,7 +4,7 @@ ZSH_THEME="bureau"
 
 COMPLETION_WAITING_DOTS="true"
 
-plugins=(zsh-autosuggestions zsh-syntax-highlighting git)
+plugins=(zsh-autosuggestions zsh-syntax-highlighting git ssh-agent)
 
 export PROMPT_COMMAND='history -a'
 export HISTFILE=/commandhistory/.zsh_history
