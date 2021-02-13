@@ -1,141 +1,126 @@
-const tmi = require('tmi.js');
-const dotenv = require("dotenv")
-dotenv.config()
-const MongoClient = require('mongodb').MongoClient;
-
+const tmi = require("tmi.js");
+const dotenv = require("dotenv");
+dotenv.config();
+const MongoClient = require("mongodb").MongoClient;
 
 async function main() {
-    const db = (await MongoClient.connect("mongodb://db:27017", {
-        useUnifiedTopology: true,
-    })).db("testing")
-    const listening = (await db.collection("listening").find({}).toArray())
+    const db = (
+        await MongoClient.connect("mongodb://db:27017", {
+            useUnifiedTopology: true,
+        })
+    ).db("testing");
+    const listening = await db.collection("listening").find({}).toArray();
 
     const client = new tmi.Client({
         identity: {
             username: process.env.TMI_USER,
-            password: process.env.TMI_KEY
+            password: process.env.TMI_KEY,
         },
         connection: {
             reconnect: true,
-            secure: true
+            secure: true,
         },
         channels: [...listening, process.env.TMI_USER],
     });
 
-    const usersColl = db.collection("users")
+    const usersColl = db.collection("users");
 
-    const triggersColl = db.collection("triggers")
-    const reactionsColl = db.collection("reactions")
+    const triggersColl = db.collection("triggers");
+    const reactionsColl = db.collection("reactions");
 
-    const commandsColl = db.collection("commands")
+    const commandsColl = db.collection("commands");
 
-    await client.connect()
-    console.log("Goewan bot initialized ")
+    await client.connect();
+    console.log("Goewan bot initialized ");
 
     let users;
-    const refreshUsers = async () => { users = await usersColl.find({}).toArray() }
+    let triggers;
+    const refreshUsers = async () => {
+        users = await usersColl.find({}).toArray();
+    };
+    const refreshTriggers = async () => {
+        triggers = await triggersColl.find({}).toArray();
+    };
 
-    await refreshUsers()
+    await refreshUsers();
+    await refreshTriggers();
 
-    client.on('message', async (channel, tags, message, self) => {
-        const sendMsg = (msg) => client.say(channel, msg);
+    client.on("message", async (channel, tags, message, self) => {
+        const { username } = tags;
+        const sendMsg = (msg) => client.say(channel, `@${username}, ${msg}`);
         if (self) return;
-        const { username } = tags
-        const tempCommand = message.split(" ")
+
+        const tempCommand = message.match(/\%\w+|\w+|"[^"]+"/g).map(x => x.replace(/\"/g, ""))
         const command = tempCommand.shift().slice(1);
 
-        const firstArg = tempCommand.shift()
-        const args = tempCommand.join(' ');
+        const firstArg = tempCommand.shift();
+        const args = tempCommand.join(" ");
+
+        console.log("Message command:", command, "with firstarg:", firstArg, "and the rest of the args:", args)
 
         if (username === process.env.ADMIN_USER && message[0] === "%") {
-            console.log("admin")
-
             switch (command) {
+                case "editreaction":
+                case "addreaction":
+                    await update(reactionsColl, firstArg, args)
+                    return;
+                case "delreaction":
+                    await del(reactionsColl, firstArg)
+                    return;
+
+                case "edittrigger":
+                case "addtrigger":
+                    await update(triggersColl, firstArg, args)
+                    await refreshTriggers();
+                    return;
+                case "deletetrigger":
+                    await del(triggersColl, firstArg)
+                    await refreshTriggers();
+                    return;
+
+                case "editcmd":
                 case "addcmd":
-                    console.log(`Added command: '${firstArg}' with response '${args}'`)
-                    await commandsColl.updateOne({
-                        name: firstArg
-                    }, {
-                        $set: {
-                            name: firstArg,
-                            response: args,
-                        }
-                    }, {
-                        upsert: true
-                    })
-                    break;
+                    await update(commandsColl, firstArg, args)
+                    return;
                 case "delcmd":
-                    await commandsColl.deleteOne({
-                        name: firstArg
-                    })
-                    break;
+                    await del(commandsColl, firstArg)
+                    return;
+
                 case "trust":
-                    await usersColl.updateOne({
-                        name: firstArg
-                    }, {
-                        $set: {
-                            name: firstArg
-                        }
-                    }, {
-                        upsert: true,
-                    })
-                    await refreshUsers()
-                    break;
+                    await update(usersColl, firstArg)
+                    await refreshUsers();
+                    return;
                 case "untrust":
-                    await usersColl.deleteOne({
-                        name: firstArg
-                    })
-                    await refreshUsers()
-                    break;
+                    await del(usersColl, firstArg)
+                    await refreshUsers();
+                    return;
             }
         }
 
-        if (users.find(x => x.name === username)) {
-            // Check if command
-            // Check if trigger
+        if (users.find((x) => x.name === username)) {
+            if (message[0] === "%") {
+                const found = await commandsColl.findOne({
+                    name: command,
+                });
+                if (!found) return;
+                sendMsg(found.response);
+            } else {
+                const triggerFound = triggers.find(x =>
+                    message.includes(x.name)
+                )
 
-            const found = await commandsColl.findOne({
-                name: firstArg
-            })
-            if (!found) return;
-            sendMsg("testing");
-
-            return
-
-
-            if (triggers.some((x) => message.includes(x))) {
-                const picked = reactions[Math.floor(Math.random() * reactions.length)]
-                client.say(channel, `@${tags['display-name']} ${picked}`)
-            } else if (message.includes("guandevbot") || message.includes("@guandevbot")) {
-                client.say(channel, "Jebaited Dit is een bot 3Head")
-            } else if (message.includes("RIOT") || message.includes("riot")) {
-                client.say(channel, "rito is the new riot")
-            } else if (message.includes("Ez clap")) {
-                client.say(channel, "EZY Clap")
-            } else if (message.includes("EZ clap")) {
-                client.say(channel, "EZY Clap")
+                if (triggerFound && triggerFound.response) {
+                    sendMsg(triggerFound.response)
+                } else if (triggerFound) {
+                    const random = await reactionsColl.aggregate(
+                        [{ $sample: { size: 1 } }]
+                    ).next()
+                    sendMsg(random.response)
+                }
+                return
             }
         }
-
-
-
-
-
-        // if (users.includes(tags.username)) {
-
-        // }
     });
-
-    // console.log(await users.find({}).toArray())
-    // await users.updateOne({
-    //     username: "koepoe_"
-    // }, {
-    //     $set: {
-    //         username: "asd"
-    //     }
-    // }, {
-    //     upsert: true,
-    // })
 }
 
 (async () => {
@@ -143,14 +128,32 @@ async function main() {
         await main();
     } catch (e) {
         console.error(e);
-        process.exit(1)
+        process.exit(1);
     }
 })();
 
-// const users = ["koepoe_", "xhatios", "guanthethird", "hiervandaan", "thedejavunl", "flyingfruitcake", "gionl", "odtjethethird"]
-// const reactions = ["Lastig he typen?", "LEER NOU EENS TYPEN", "catJAM still can't type", "Poggies kan je nou nog steeds niet typen"]
 // const triggers = ["SAdge", "Saadge", "pepD", "ppeD", "SAadge", "peepd", "peepD", "PEPEd", "peped", "poggies", "PepeD", "kekw", "Dadge", "Sadge\\", "KEKw", "#Head", "5head", "MadestNo", "sadge", "Sadhe", "3head", "<3*", "<#"]
 
+async function update(coll, name, val) {
+    const sett = {
+        name,
+        response: val
+    }
+    if (!val) delete sett.response
 
+    await coll.updateOne(
+        {
+            name,
+        },
+        {
+            $set: sett
+        },
+        {
+            upsert: true,
+        }
+    );
+}
 
-
+async function del(coll, name) {
+    await coll.deleteOne({ name });
+}
