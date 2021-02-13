@@ -1,5 +1,6 @@
 const tmi = require("tmi.js");
 const dotenv = require("dotenv");
+const exec = require("await-exec")
 dotenv.config();
 const MongoClient = require("mongodb").MongoClient;
 
@@ -60,6 +61,17 @@ async function main() {
 
         if (username === process.env.ADMIN_USER && message[0] === "%") {
             switch (command) {
+                case "dump":
+                    let res = await exec(`mongodump --uri="mongodb://db:27017"`)
+                    console.log(res)
+                    return;
+                case "restore":
+                    let res2 = await exec(`mongorestore --uri="mongodb://db:27017" dump/`)
+                    console.log(res2)
+                    await refreshUsers();
+                    await refreshTriggers();
+                    return;
+
                 case "editreaction":
                 case "addreaction":
                     await update(reactionsColl, firstArg, args)
@@ -70,10 +82,10 @@ async function main() {
 
                 case "edittrigger":
                 case "addtrigger":
-                    await update(triggersColl, firstArg, args)
+                    await update(triggersColl, firstArg, args.length === 0 ? firstArg : args)
                     await refreshTriggers();
                     return;
-                case "deletetrigger":
+                case "deltrigger":
                     await del(triggersColl, firstArg)
                     await refreshTriggers();
                     return;

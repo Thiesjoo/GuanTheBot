@@ -2,13 +2,18 @@ FROM alpine:3.13
 ARG USERNAME=vscode
 
 # Packages
-RUN apk add zsh git openssh gnupg nodejs curl libgcc libstdc++ npm mongodb-tools --no-cache
+RUN apk add zsh git openssh gnupg nodejs curl libgcc libstdc++ npm mongodb-tools \
+     docker-cli=20.10.3-r0 \
+     docker-compose=1.27.4-r0 \
+     --no-cache
 
 # User
 RUN  adduser --shell /bin/zsh --uid 1000 --disabled-password $USERNAME  && \
      mkdir /commandhistory && \
      touch /commandhistory/.bash_history && \
-     chown -R $USERNAME /commandhistory
+     chown -R $USERNAME /commandhistory && \
+     addgroup docker && \
+     addgroup ${USERNAME} docker 
 
 ## ZSH Setup
 USER $USERNAME

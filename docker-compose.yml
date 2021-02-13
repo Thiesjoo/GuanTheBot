@@ -1,0 +1,13 @@
+version: "3.8"
+services:
+  twitchtestingbot:
+    image: thiesjoo/twitchtestingbot:latest
+    volumes:
+      - ${LOCAL_WORKSPACE_FOLDER}/.env:/usr/src/.env
+  db:
+    image: mongo:latest
+    restart: unless-stopped
+    volumes:
+      - db-data:/data/db
+volumes:
+  db-data:
