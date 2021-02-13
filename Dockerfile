@@ -1,28 +1,3 @@
-# FROM alpine:3.12
-
-# RUN apk --no-cache add \
-#   dumbinit \ 
-#   mongodb-tools \
-#   nodejs \
-#   npm
-
-# ENV NODE_ENV=production
-
-# WORKDIR /usr/src/
-
-# COPY src/ ./src
-# COPY package.json .
-# COPY package-lock.json .
-# COPY dump dump/
-
-# RUN npm install --production 
-# USER node
-
-# CMD ["dumb-init", "node", "dist/main"]
-
-
-
-
 ARG ALPINE_VERSION=3.12
 ARG NODE_VERSION=14.15.4
 

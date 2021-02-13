@@ -32,7 +32,7 @@ async function main() {
     const commandsColl = db.collection("commands");
 
     await client.connect();
-    console.log("Goewan bot initialized ");
+    console.log("Goewan bot initialized");
 
     let users;
     let triggers;
@@ -144,14 +144,12 @@ async function main() {
     }
 })();
 
-// const triggers = ["SAdge", "Saadge", "pepD", "ppeD", "SAadge", "peepd", "peepD", "PEPEd", "peped", "poggies", "PepeD", "kekw", "Dadge", "Sadge\\", "KEKw", "#Head", "5head", "MadestNo", "sadge", "Sadhe", "3head", "<3*", "<#"]
-
-async function update(coll, name, val) {
+async function update(coll, name, response) {
     const sett = {
         name,
-        response: val
+        response
     }
-    if (!val) delete sett.response
+    if (!response) delete sett.response
 
     await coll.updateOne(
         {
