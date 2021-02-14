@@ -28,4 +28,6 @@ COPY dump/ dump/
 RUN npm ci --only=production
 
 USER node
-CMD ["dumb-init", "node", "dist/index"]
+
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["./node_modules/.bin/nodemon","dist/"]
