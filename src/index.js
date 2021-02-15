@@ -54,13 +54,11 @@ async function main() {
             const sendMsg = (msg) => client.say(channel, `@${username}, ${msg}`);
             if (self) return;
 
-            const tempCommand = message.match(/\%\w+|\w+|"[^"]+"/g).map(x => x.replace(/\"/g, ""))
-            const command = tempCommand.shift().slice(1);
+            const tempCommand = message.match(/\%\w+|\w+|"[^"]+"/g)?.map(x => x.replace(/\"/g, ""))
+            const command = tempCommand?.shift()?.slice(1);
 
-            const firstArg = tempCommand.shift();
-            const args = tempCommand.join(" ");
-
-            console.log("Message command:", command, "with firstarg:", firstArg, "and the rest of the args:", args)
+            const firstArg = tempCommand?.shift();
+            const args = tempCommand?.join(" ");
 
             if (username === process.env.ADMIN_USER && message[0] === "%") {
                 switch (command) {
@@ -98,12 +96,14 @@ async function main() {
 
                     case "edittrigger":
                     case "addtrigger":
-                        await update(triggersColl, firstArg, args.length === 0 ? firstArg : args)
+                        await update(triggersColl, firstArg, args.length === 0 ? null : args)
                         await refreshTriggers();
+                        console.log("added trigger", firstArg)
                         return;
                     case "deltrigger":
                         await del(triggersColl, firstArg)
                         await refreshTriggers();
+                        console.log("deleted trigger", firstArg)
                         return;
 
                     case "editcmd":
@@ -136,15 +136,18 @@ async function main() {
                     const triggerFound = triggers.find(x =>
                         message.includes(x.name)
                     )
-
-                    if (triggerFound && triggerFound.response) {
-                        sendMsg(triggerFound.response)
-                    } else if (triggerFound) {
-                        const random = await reactionsColl.aggregate(
-                            [{ $sample: { size: 1 } }]
-                        ).next()
-                        sendMsg(random.response)
+                    if (triggerFound) {
+                        console.log(triggerFound)
+                        if (triggerFound.response) {
+                            sendMsg(triggerFound.response)
+                        } else {
+                            const random = await reactionsColl.aggregate(
+                                [{ $sample: { size: 1 } }]
+                            ).next()
+                            sendMsg(random.response)
+                        }
                     }
+
                     return
                 }
             }
