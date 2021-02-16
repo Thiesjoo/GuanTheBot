@@ -50,7 +50,7 @@ async function main() {
         await refreshTriggers();
 
         client.on("message", async (channel, tags, message, self) => {
-            const { username } = tags;
+            const { username, "display-name": displayName } = tags;
             const sendMsg = (msg) => client.say(channel, `@${username}, ${msg}`);
             if (self) return;
 
@@ -127,17 +127,34 @@ async function main() {
 
             if (users.find((x) => x.name === username)) {
                 if (message[0] === "%") {
-                    const found = await commandsColl.findOne({
-                        name: command,
-                    });
-                    if (!found) return;
-                    sendMsg(found.response);
+                    switch (command) {
+                        case "counter":
+                            const splitted = message.split(' ');
+                            const userName =
+                                splitted?.length > 1
+                                    ? splitted[1].replace('@', '')
+                                    : username
+                            const test = await usersColl.findOne({ name: userName })
+                            if (!test || !test.counter) {
+                                sendMsg("User niet gevonden in database")
+                                return;
+                            }
+                            sendMsg(`${userName} heeft nu al ${test.counter} iets verkeerd getypdt`)
+
+                            return;
+                        default:
+                            const found = await commandsColl.findOne({
+                                name: command,
+                            });
+                            if (!found) return;
+                            sendMsg(found.response);
+                            return
+                    }
                 } else {
                     const triggerFound = triggers.find(x =>
                         message.includes(x.name)
                     )
                     if (triggerFound) {
-                        console.log(triggerFound)
                         if (triggerFound.response) {
                             sendMsg(triggerFound.response)
                         } else {
@@ -146,8 +163,14 @@ async function main() {
                             ).next()
                             sendMsg(random.response)
                         }
-                    }
 
+                        // Update the user counter
+                        await usersColl.updateOne({
+                            name: username,
+                        }, {
+                            $inc: { counter: 1 }
+                        })
+                    }
                     return
                 }
             }

@@ -30,4 +30,4 @@ USER node
 
 COPY dump/ dump/
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["./node_modules/.bin/nodemon","dist/"]
+CMD ["./node_modules/.bin/nodemon","--watch","'dist/**/*'", "-e", "js", "dist/."]

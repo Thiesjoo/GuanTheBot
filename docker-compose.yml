@@ -4,6 +4,7 @@ services:
     image: thiesjoo/twitchtestingbot:latest
     volumes:
       - ${LOCAL_WORKSPACE_FOLDER}/.env:/usr/src/.env
+      - ${LOCAL_WORKSPACE_FOLDER}/dump:/usr/src/dump
   db:
     image: mongo:latest
     restart: unless-stopped
