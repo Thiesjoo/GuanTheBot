@@ -75,6 +75,17 @@ async function main() {
                         err("RECON")
                         break;
 
+
+                    case "resetCountersAASDTHISISRANDOMTONOTTRIGGERAUTO":
+                        console.log("resettings")
+                        const splitted = message.split(' ');
+                        const userName =
+                            splitted?.length > 1
+                                ? splitted[1].replace('@', '')
+                                : username
+                        await usersColl.updateOne({ name: userName }, { $set: { counter: 0 } })
+                        return;
+
                     case "dump":
                         let res = await exec(`mongodump --uri="mongodb://db:27017"`)
                         console.log(res)
@@ -135,7 +146,7 @@ async function main() {
                                     ? splitted[1].replace('@', '')
                                     : username
                             const test = await usersColl.findOne({ name: userName })
-                            if (!test || !test.counter) {
+                            if (!test) {
                                 sendMsg("User niet gevonden in database")
                                 return;
                             }
