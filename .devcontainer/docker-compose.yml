@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - ..:/workspace
+      - ..:/twitchtestbot
       - /var/run/docker.sock:/var/run/docker.sock
   db:
     image: mongo:latest
