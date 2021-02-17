@@ -86,15 +86,19 @@ async function main() {
                         await usersColl.updateOne({ name: userName }, { $set: { counter: 0 } })
                         return;
 
-                    case "dump":
-                        let res = await exec(`mongodump --uri="mongodb://db:27017"`)
-                        console.log(res)
+                    case "dumpTHISISARANDOMSTRINGPLSNORESTORE":
+                        if (process.env.NODE_ENV !== "production") {
+                            let res = await exec(`mongodump --uri="${process.env.MONGO_URL}/${process.env.MONGO_DB}"`)
+                            console.log(res)
+                        }
                         return;
-                    case "restore":
-                        let res2 = await exec(`mongorestore --uri="mongodb://db:27017" dump/`)
-                        console.log(res2)
-                        await refreshUsers();
-                        await refreshTriggers();
+                    case "restoreTHISISARANDOMSTRINGPLSNORESTORE":
+                        if (process.env.NODE_ENV !== "production") {
+                            let res2 = await exec(`mongorestore --uri="${process.env.MONGO_URL}/${process.env.MONGO_DB}" --nsFrom="twitchtestbot.*" --nsTo="${process.env.MONGO_DB}.*" dump/`)
+                            console.log(res2)
+                            await refreshUsers();
+                            await refreshTriggers();
+                        }
                         return;
 
                     case "editreaction":

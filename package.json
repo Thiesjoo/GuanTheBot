@@ -5,7 +5,7 @@
 	"main": "index.js",
 	"scripts": {
 		"start": "nodemon --watch 'src/**/*' -e js src/. ",
-		"prestart:docker": "mongodump --uri='mongodb://db:27017' && docker build . -t thiesjoo/twitchtestingbot",
+		"prestart:docker": "docker build . -t thiesjoo/twitchtestingbot",
 		"start:docker": "docker-compose -p twitchtestingbot up"
 	},
 	"author": "",
