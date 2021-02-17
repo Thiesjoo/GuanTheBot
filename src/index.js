@@ -7,10 +7,10 @@ const MongoClient = require("mongodb").MongoClient;
 async function main() {
     return new Promise(async (done, err) => {
         const db = (
-            await MongoClient.connect("mongodb://db:27017", {
+            await MongoClient.connect(process.env.MONGO_URL, {
                 useUnifiedTopology: true,
             })
-        ).db("testing");
+        ).db(process.env.MONGO_DB);
         const listening = await (await db.collection("listening").find({}).toArray()).map(x => {
             return x.name
         })
