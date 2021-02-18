@@ -1,6 +1,7 @@
 const tmi = require("tmi.js");
 const dotenv = require("dotenv");
 const exec = require("await-exec");
+const Mustache = require("mustache-async");
 dotenv.config();
 const MongoClient = require("mongodb").MongoClient;
 
@@ -174,7 +175,26 @@ async function main() {
 								name: command,
 							});
 							if (!found) return;
-							sendMsg(found.response);
+							const secondPass = await Mustache.render(
+								found.response,
+								{
+									count: async () => {
+										return found?.counter || 0;
+									},
+								},
+								null,
+								["${", "}"]
+							);
+
+							sendMsg(secondPass);
+							await commandsColl.updateOne(
+								{
+									name: command,
+								},
+								{
+									$inc: { counter: 1 },
+								}
+							);
 							return;
 					}
 				} else {
