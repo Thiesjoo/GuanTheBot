@@ -142,6 +142,22 @@ async function main() {
 						await del(commandsColl, firstArg);
 						return;
 
+					case "cmdcounter":
+						const num = parseInt(args);
+						if (!num) {
+							console.error("not a num", args);
+							return;
+						}
+						await commandsColl.updateOne(
+							{
+								name: firstArg,
+							},
+							{
+								$set: { counter: num },
+							}
+						);
+						return;
+
 					case "trust":
 						await update(usersColl, firstArg);
 						await refreshUsers();
