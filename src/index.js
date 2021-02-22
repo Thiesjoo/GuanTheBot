@@ -91,6 +91,20 @@ async function main() {
 						);
 						return;
 
+					case "addToUser":
+						const splitted2 = message.split(" ");
+						const userName2 =
+							splitted2.length > 1 ? splitted2[1].replace("@", "") : username;
+
+						const amount =
+							splitted2.length > 2 ? (+splitted2[2] ? +splitted2[2] : 1) : 1;
+
+						await usersColl.updateOne(
+							{ name: userName2 },
+							{ $inc: { counter: amount } }
+						);
+						return;
+
 					case "dumpTHISISARANDOMSTRINGPLSNORESTORE":
 						if (process.env.NODE_ENV !== "production") {
 							let res = await exec(
