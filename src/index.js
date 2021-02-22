@@ -176,6 +176,12 @@ async function main() {
 							const splitted = message.split(" ");
 							const userName =
 								splitted?.length > 1 ? splitted[1].replace("@", "") : username;
+							if (userName === "triggers") {
+								sendMsg(
+									`Er zijn nu al ${triggers.length} triggers in de database`
+								);
+								return;
+							}
 							const test = await usersColl.findOne({ name: userName });
 							if (!test) {
 								sendMsg("User niet gevonden in database");
