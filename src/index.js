@@ -2,8 +2,14 @@ const tmi = require("tmi.js");
 const dotenv = require("dotenv");
 const exec = require("await-exec");
 const Mustache = require("mustache-async");
+const os = require("os")
 dotenv.config();
+const axios = require("axios").default
+const convert = require('xml-js');
 const MongoClient = require("mongodb").MongoClient;
+
+
+let lastTime = 0;
 
 async function main() {
 	return new Promise(async (done, err) => {
@@ -54,7 +60,7 @@ async function main() {
 
 		client.on("message", async (channel, tags, message, self) => {
 			const { username, "display-name": displayName } = tags;
-			const sendMsg = (msg) => client.say(channel, `@${username}, ${msg}`);
+			const sendMsg = (...rest) => client.say(channel, `@${username}, ${rest.join(' ')}`);
 			if (self) return;
 
 			const tempCommand = message
@@ -124,6 +130,12 @@ async function main() {
 						}
 						return;
 
+
+					case "info":
+						console.log("INFO REQUESTED")
+						sendMsg(os.hostname())
+						console.log(process.env.WRA_KEY, `http://api.wolframalpha.com/v2/query?input=2*2&appid=${process.env.WRA_KEY}`)
+						return
 					case "editreaction":
 					case "addreaction":
 						await update(reactionsColl, firstArg, args);
@@ -206,6 +218,31 @@ async function main() {
 							);
 
 							return;
+
+						case "ask":
+							if (Date.now() - lastTime < 10 * 1000) {
+								sendMsg("Sorry wolfram heeft timeout. Eventjes wachten (:")
+								return
+							}
+							console.log("Args: ", encodeURIComponent(firstArg + args))
+							const wraData = (await axios.default.get(`http://api.wolframalpha.com/v2/query?input=${encodeURIComponent(firstArg + args)}&appid=${process.env.WRA_KEY}`)).data
+							if (!wraData) {
+								return sendMsg("YEP wolfram pakot")
+							}
+							lastTime = Date.now()
+							const converted = convert.xml2js(wraData)
+							console.log(convert.xml2json(wraData))
+							sendMsg(converted?.
+								elements?.[0]?. // Query result
+								elements?.[1]?. // Result pod
+								elements?.[0]?. // Result subpod
+								elements?.[1]?. // Result text (Instead of image)
+								elements?.[0]?. // Subpod
+								text //Final text resut
+								|| "Er is is mis gegaan Sadge . Staat je som wel tussen aanhalignstekens? \"4*200\"(Ping Guwan if it broke)"
+							)
+							return
+
 						default:
 							const found = await commandsColl.findOne({
 								name: command,

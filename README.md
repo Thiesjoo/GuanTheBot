@@ -13,6 +13,7 @@ TMI_USER=the bot user
 ADMIN_USER=user with admin privilges of the app
 MONGO_URL=url to your mongodb database (mongodb://db:27017 for local dev)
 MONGO_DB=the db to store information
+WRA_KEY=the api key from wolframalpha
 ```
 
 ## Installation

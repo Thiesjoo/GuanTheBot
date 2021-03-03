@@ -3,6 +3,7 @@ ARG USERNAME=vscode
 
 # Packages
 RUN apk add zsh git openssh gnupg nodejs curl libgcc libstdc++ npm mongodb-tools \
+     libxml2-dev make g++ \
      docker-cli=20.10.3-r0 \
      docker-compose=1.27.4-r0 \
      --no-cache
