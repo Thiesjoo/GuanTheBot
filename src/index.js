@@ -224,23 +224,43 @@ async function main() {
 								sendMsg("Sorry wolfram heeft timeout. Eventjes wachten (:")
 								return
 							}
-							console.log("Args: ", encodeURIComponent(firstArg + args))
-							const wraData = (await axios.default.get(`http://api.wolframalpha.com/v2/query?input=${encodeURIComponent(firstArg + args)}&appid=${process.env.WRA_KEY}`)).data
-							if (!wraData) {
+
+							const messageArgsAsks = message.split(" ")
+							messageArgsAsks?.shift()
+							const messageArgs = messageArgsAsks?.join(" ");
+
+							if (!messageArgs) {
+								return sendMsg("Je moet wel een vraag stellen (: ")
+							}
+
+							console.log("Args: ", encodeURIComponent(messageArgs))
+							// Encode input as URI component
+							// Include our appID
+							// Only include Solution and Result Pods
+							// Return in json and without images(Plaintext)
+							const wraData = (await axios.default.get(`http://api.wolframalpha.com/v2/query?input=${encodeURIComponent(messageArgs)}&appid=${process.env.WRA_KEY}&includepodid=Solution&includepodid=Result&output=json&format=plaintext&translation=true`)).data
+							console.log(wraData)
+							if (!wraData || wraData?.queryresult?.error) {
 								return sendMsg("YEP wolfram pakot")
 							}
+							if (wraData.queryresult.error || !wraData.queryresult.success) {
+								return sendMsg("Hmmm ik begrijp je vraag niet. (Moet engels zijn (: )")
+							}
+							const res = wraData?.queryresult?.pods
+							if (!res) {
+								return sendMsg("Er is helaas geen resultaat. Of je vraag is niet goed of er is bijvoorbeeld geen reeël resultaat")
+							}
+							const resPod = res[0]
+							console.log(resPod)
+							if (!resPod || !resPod?.subpods || resPod?.subpods?.length < 1) {
+								return sendMsg("Er is geen resultaat Sadge")
+							}
+							if (!resPod.subpods[0].plaintext) {
+								return sendMsg("Er is helaas geen leesbaar resultaat")
+							}
+
+							sendMsg(`Het antwoord is: ${resPod.subpods[0]?.plaintext}`)
 							lastTime = Date.now()
-							const converted = convert.xml2js(wraData)
-							console.log(convert.xml2json(wraData))
-							sendMsg(converted?.
-								elements?.[0]?. // Query result
-								elements?.[1]?. // Result pod
-								elements?.[0]?. // Result subpod
-								elements?.[1]?. // Result text (Instead of image)
-								elements?.[0]?. // Subpod
-								text //Final text resut
-								|| "Er is is mis gegaan Sadge . Staat je som wel tussen aanhalignstekens? \"4*200\"(Ping Guwan if it broke)"
-							)
 							return
 
 						default:
