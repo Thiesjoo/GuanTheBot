@@ -238,7 +238,7 @@ async function main() {
 							// Include our appID
 							// Only include Solution and Result Pods
 							// Return in json and without images(Plaintext)
-							const wraData = (await axios.default.get(`http://api.wolframalpha.com/v2/query?input=${encodeURIComponent(messageArgs)}&appid=${process.env.WRA_KEY}&includepodid=Solution&includepodid=Result&output=json&format=plaintext&translation=true`)).data
+							const wraData = (await axios.default.get(`http://api.wolframalpha.com/v2/query?input=${encodeURIComponent(messageArgs)}&appid=${process.env.WRA_KEY}&includepodid=Solution&includepodid=Result&includepodid=Definitions&output=json&format=plaintext&translation=true&reinterpret=true`)).data
 							console.log(wraData)
 							if (!wraData || wraData?.queryresult?.error) {
 								return sendMsg("YEP wolfram pakot")
