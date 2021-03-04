@@ -260,6 +260,9 @@ async function main() {
 							resPod.subpods.forEach(x => {
 								outputString += x.plaintext ? (outputString.length === 0 ? "" : " v ") + x.plaintext : ""
 							})
+							if (outputString.length > 50) {
+								return sendMsg("Sorry het antwoord is te lang")
+							}
 							sendMsg(`Het antwoord is: ${outputString}`)
 							lastTime = Date.now()
 							return
