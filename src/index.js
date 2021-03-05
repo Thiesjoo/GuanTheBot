@@ -1,13 +1,12 @@
+"use strict";
 const tmi = require("tmi.js");
 const dotenv = require("dotenv");
 const exec = require("await-exec");
 const Mustache = require("mustache-async");
-const os = require("os")
+const os = require("os");
 dotenv.config();
-const axios = require("axios").default
-const convert = require('xml-js');
+const axios = require("axios").default;
 const MongoClient = require("mongodb").MongoClient;
-
 
 let lastTime = 0;
 
@@ -18,11 +17,11 @@ async function main() {
 				useUnifiedTopology: true,
 			})
 		).db(process.env.MONGO_DB);
-		const listening = await (
+
+		// All the channels to listen for
+		const listening = (
 			await db.collection("listening").find({}).toArray()
-		).map((x) => {
-			return x.name;
-		});
+		).map((x) => x.name);
 
 		const client = new tmi.Client({
 			identity: {
@@ -36,11 +35,15 @@ async function main() {
 			channels: [...listening, process.env.TMI_USER],
 		});
 
+		/** Users collection */
 		const usersColl = db.collection("users");
 
+		/** Trigger word collection */
 		const triggersColl = db.collection("triggers");
+		/** Reactions to triggers */
 		const reactionsColl = db.collection("reactions");
 
+		/** Collection of commands */
 		const commandsColl = db.collection("commands");
 
 		await client.connect();
@@ -60,7 +63,9 @@ async function main() {
 
 		client.on("message", async (channel, tags, message, self) => {
 			const { username, "display-name": displayName } = tags;
-			const sendMsg = (...rest) => client.say(channel, `@${username}, ${rest.join(' ')}`);
+			const sendMsg = (...rest) =>
+				client.say(channel, `@${username}, ${rest.join(" ")}`);
+
 			if (self || username === process.env.TMI_USER) return;
 
 			const tempCommand = message
@@ -70,128 +75,137 @@ async function main() {
 
 			const firstArg = tempCommand?.shift();
 			const args = tempCommand?.join(" ");
+			const taggedUsername = firstArg ? firstArg.replace("@", "") : username;
 
 			if (username === process.env.ADMIN_USER && message[0] === "%") {
 				switch (command) {
-					case "listen":
-						await update(db.collection("listening"), firstArg);
+					case "listen": {
+						await updateItem(db.collection("listening"), firstArg);
 						client.disconnect();
 						client.removeAllListeners("message");
 						err("RECON");
 						break;
-					case "unlisten":
-						await del(db.collection("listening"), firstArg);
+					}
+					case "unlisten": {
+						await deleteItem(db.collection("listening"), firstArg);
 						client.disconnect();
 						client.removeAllListeners("message");
 						err("RECON");
 						break;
+					}
 
-					case "resetCountersAASDTHISISRANDOMTONOTTRIGGERAUTO":
-						console.log("resettings");
-						const splitted = message.split(" ");
-						const userName =
-							splitted?.length > 1 ? splitted[1].replace("@", "") : username;
+					case "resetCountersAASDTHISISRANDOMTONOTTRIGGERAUTO": {
+						console.log("Resettings counter for a peerson");
 						await usersColl.updateOne(
-							{ name: userName },
+							{ name: taggedUsername },
 							{ $set: { counter: 0 } }
 						);
 						return;
+					}
 
 					case "addToUser":
-						const splitted2 = message.split(" ");
-						const userName2 =
-							splitted2.length > 1 ? splitted2[1].replace("@", "") : username;
+						{
+							await usersColl.updateOne(
+								{ name: taggedUsername },
+								{
+									$inc: {
+										counter: +args || 1 // Convert the second arg to a number, or just add 1 if it is not defined
+									}
+								}
+							);
+							return;
+						}
 
-						const amount =
-							splitted2.length > 2 ? (+splitted2[2] ? +splitted2[2] : 1) : 1;
-
-						await usersColl.updateOne(
-							{ name: userName2 },
-							{ $inc: { counter: amount } }
-						);
-						return;
-
-					case "dumpTHISISARANDOMSTRINGPLSNORESTORE":
+					case "dumpTHISISARANDOMSTRINGPLSNORESTORE": {
 						if (process.env.NODE_ENV !== "production") {
 							let res = await exec(
 								`mongodump --uri="${process.env.MONGO_URL}/${process.env.MONGO_DB}"`
 							);
-							console.log(res);
+							console.log("Result of dump: ", res);
 						}
 						return;
-					case "restoreTHISISARANDOMSTRINGPLSNORESTORE":
+					}
+					case "restoreTHISISARANDOMSTRINGPLSNORESTORE": {
 						if (process.env.NODE_ENV !== "production") {
-							let res2 = await exec(
+							let res = await exec(
 								`mongorestore --uri="${process.env.MONGO_URL}/${process.env.MONGO_DB}" --nsFrom="twitchtestbot.*" --nsTo="${process.env.MONGO_DB}.*" dump/`
 							);
-							console.log(res2);
+							console.log("Result of restore: ", res);
 							await refreshUsers();
 							await refreshTriggers();
 						}
 						return;
+					}
 
-
-					case "info":
-						console.log("INFO REQUESTED")
-						sendMsg(os.hostname())
-						console.log(process.env.WRA_KEY, `http://api.wolframalpha.com/v2/query?input=2*2&appid=${process.env.WRA_KEY}`)
-						return
+					case "info": {
+						console.log("INFO REQUESTED");
+						sendMsg(`Hostname: ${os.hostname()}`);
+						return;
+					}
 					case "editreaction":
-					case "addreaction":
-						await update(reactionsColl, firstArg, args);
-						return;
-					case "delreaction":
-						await del(reactionsColl, firstArg);
-						return;
+					case "addreaction": {
+						return await updateItem(reactionsColl, firstArg, args);
+					}
+					case "delreaction": {
+						return await deleteItem(reactionsColl, firstArg);
+					}
 
 					case "edittrigger":
-					case "addtrigger":
-						await update(
+					case "addtrigger": {
+						await updateItem(
 							triggersColl,
 							firstArg,
 							args.length === 0 ? null : args
 						);
 						await refreshTriggers();
-						console.log("added trigger", firstArg);
+						console.log("Added a trigger", firstArg);
 						return;
-					case "deltrigger":
-						await del(triggersColl, firstArg);
+					}
+					case "deltrigger": {
+						await deleteItem(triggersColl, firstArg);
 						await refreshTriggers();
-						console.log("deleted trigger", firstArg);
+						console.log("Deleted trigger", firstArg);
 						return;
+					}
 
 					case "editcmd":
 					case "addcmd":
-						await update(commandsColl, firstArg, args);
-						return;
+						{
+							return await updateItem(commandsColl, firstArg, args);
+						}
 					case "delcmd":
-						await del(commandsColl, firstArg);
-						return;
+						{
+							return await deleteItem(commandsColl, firstArg);
+						}
 
 					case "cmdcounter":
-						const num = parseInt(args);
-						if (!num) {
-							console.error("not a num", args);
+						{
+							const numberToSet = parseInt(args);
+							if (!numberToSet) {
+								console.error("Not a number", args);
+								return;
+							}
+							await commandsColl.updateOne(
+								{
+									name: firstArg,
+								},
+								{
+									$set: { counter: numberToSet },
+								}
+							);
 							return;
 						}
-						await commandsColl.updateOne(
-							{
-								name: firstArg,
-							},
-							{
-								$set: { counter: num },
-							}
-						);
-						return;
 
-					case "trust":
-						await update(usersColl, firstArg);
+					case "trust": {
+						await updateItem(usersColl, firstArg);
 						await refreshUsers();
 						return;
-					case "untrust":
-						await del(usersColl, firstArg);
+					}
+					case "untrust": {
+						await deleteItem(usersColl, firstArg);
 						await refreshUsers();
 						return;
+					}
 				}
 			}
 
@@ -199,115 +213,140 @@ async function main() {
 				if (message[0] === "%") {
 					switch (command) {
 						case "hug":
-							return sendMsg(`${displayName} hugs ${firstArg} <3 cjoet`)
-
+							{
+								return sendMsg(`${displayName} hugs ${firstArg} <3 cjoet`);
+							}
 						case "top":
-							const resultTop = await usersColl.find({}).sort([["counter", -1]]).limit(5).toArray()
-							return sendMsg(resultTop.reduce((acc, val) => {
-								acc += `${acc.length === 0 ? "" : " | "}${val.name} zit op ${val.counter}`
-								return acc
-							}, ""))
+							{
+								const resultTop = await usersColl
+									.find({})
+									.sort([["counter", -1]])
+									.limit(5)
+									.toArray();
+								return sendMsg(
+									resultTop.reduce((acc, val) => {
+										acc += `${acc.length === 0 ? "" : " | "}${val.name} zit op ${val.counter
+											}`;
+										return acc;
+									}, "")
+								);
+							}
 
 						case "counter":
-							const splitted = message.split(" ");
-							const userName =
-								splitted?.length > 1 ? splitted[1].replace("@", "") : username;
-							if (userName === "triggers") {
-								sendMsg(
-									`Er zijn nu al ${triggers.length} triggers in de database`
+							{
+								if (taggedUsername === "triggers") {
+									sendMsg(
+										`Er zijn nu al ${triggers.length} triggers in de database`
+									);
+									return;
+								}
+								const foundUser = await usersColl.findOne({ name: taggedUsername });
+								if (!foundUser) {
+									return sendMsg("User niet gevonden in database");
+								}
+								return sendMsg(
+									`${taggedUsername} heeft nu al ${foundUser.counter} iets verkeerd getypdt`
+								);
+							}
+
+						case "ask":
+							{
+								if (Date.now() - lastTime < 10 * 1000) {
+									sendMsg("Sorry wolfram heeft timeout. Eventjes wachten (:");
+									return;
+								}
+
+								const messageArgsAsks = message.split(" ");
+								messageArgsAsks?.shift();
+								const messageArgs = messageArgsAsks?.join(" ");
+
+								if (!messageArgs) {
+									return sendMsg("Je moet wel een vraag stellen (: ");
+								}
+
+								console.log("Args: ", encodeURIComponent(messageArgs));
+								// Encode input as URI component
+								// Include our appID
+								// Only include Solution and Result Pods
+								// Return in json and without images(Plaintext)
+								const wraData = (
+									await axios.default.get(
+										`http://api.wolframalpha.com/v2/query?input=${encodeURIComponent(
+											messageArgs
+										)}&appid=${process.env.WRA_KEY
+										}&includepodid=Solution&includepodid=Result&includepodid=Definitions&includepodid=Definition:WordData&output=json&format=plaintext&translation=true&reinterpret=true`
+									)
+								).data;
+								console.log(wraData);
+
+								//WRA response failure
+								if (!wraData || wraData?.queryresult?.error) {
+									return sendMsg("YEP wolfram pakot");
+								}
+
+								//Error from WRA response
+								if (wraData.queryresult.error || !wraData.queryresult.success) {
+									return sendMsg(
+										"Hmmm ik begrijp je vraag niet. (Moet engels zijn (: )"
+									);
+								}
+
+								// Pods errors
+								const res = wraData?.queryresult?.pods;
+								if (!res) {
+									return sendMsg(
+										"Er is helaas geen resultaat. Of je vraag is niet goed of er is bijvoorbeeld geen reeël resultaat"
+									);
+								}
+								const resPod = res[0];
+								if (!resPod || !resPod?.subpods || resPod?.subpods?.length < 1) {
+									return sendMsg("Er is geen resultaat Sadge");
+								}
+
+								let outputString = "";
+								resPod.subpods.forEach((x) => {
+									outputString += x.plaintext
+										? (outputString.length === 0 ? "" : " v ") + x.plaintext
+										: "";
+								});
+								if (outputString.length > 50) {
+									return sendMsg("Sorry het antwoord is te lang");
+								}
+								lastTime = Date.now();
+								return sendMsg(
+									`Het antwoord is: ${outputString.slice(0, 50)}${outputString.length > 50 ? "..." : ""
+									}`
+								);
+							}
+
+						default:
+							{
+								const foundCommand = await commandsColl.findOne({
+									name: command,
+								});
+								if (!foundCommand) return;
+								const parsedCommand = await Mustache.render(
+									foundCommand.response,
+									{
+										count: async () => {
+											return foundCommand?.counter || 0;
+										},
+									},
+									null,
+									["${", "}"]
+								);
+
+								sendMsg(parsedCommand);
+								await commandsColl.updateOne(
+									{
+										name: command,
+									},
+									{
+										$inc: { counter: 1 },
+									}
 								);
 								return;
 							}
-							const test = await usersColl.findOne({ name: userName });
-							if (!test) {
-								sendMsg("User niet gevonden in database");
-								return;
-							}
-							sendMsg(
-								`${userName} heeft nu al ${test.counter} iets verkeerd getypdt`
-							);
-
-							return;
-
-						case "ask":
-							if (Date.now() - lastTime < 10 * 1000) {
-								sendMsg("Sorry wolfram heeft timeout. Eventjes wachten (:")
-								return
-							}
-
-							const messageArgsAsks = message.split(" ")
-							messageArgsAsks?.shift()
-							const messageArgs = messageArgsAsks?.join(" ");
-
-							if (!messageArgs) {
-								return sendMsg("Je moet wel een vraag stellen (: ")
-							}
-
-							console.log("Args: ", encodeURIComponent(messageArgs))
-							// Encode input as URI component
-							// Include our appID
-							// Only include Solution and Result Pods
-							// Return in json and without images(Plaintext)
-							const wraData = (await axios.default.get(`http://api.wolframalpha.com/v2/query?input=${encodeURIComponent(messageArgs)}&appid=${process.env.WRA_KEY}&includepodid=Solution&includepodid=Result&includepodid=Definitions&includepodid=Definition:WordData&output=json&format=plaintext&translation=true&reinterpret=true`)).data
-							console.log(wraData)
-
-							//WRA response failure
-							if (!wraData || wraData?.queryresult?.error) {
-								return sendMsg("YEP wolfram pakot")
-							}
-
-							//Error from WRA response
-							if (wraData.queryresult.error || !wraData.queryresult.success) {
-								return sendMsg("Hmmm ik begrijp je vraag niet. (Moet engels zijn (: )")
-							}
-
-							// Pods errors
-							const res = wraData?.queryresult?.pods
-							if (!res) {
-								return sendMsg("Er is helaas geen resultaat. Of je vraag is niet goed of er is bijvoorbeeld geen reeël resultaat")
-							}
-							const resPod = res[0]
-							if (!resPod || !resPod?.subpods || resPod?.subpods?.length < 1) {
-								return sendMsg("Er is geen resultaat Sadge")
-							}
-
-							let outputString = ""
-							resPod.subpods.forEach(x => {
-								outputString += x.plaintext ? (outputString.length === 0 ? "" : " v ") + x.plaintext : ""
-							})
-							if (outputString.length > 50) {
-								return sendMsg("Sorry het antwoord is te lang")
-							}
-							sendMsg(`Het antwoord is: ${outputString.slice(0, 50)}${outputString.length > 50 ? "..." : ""}`)
-							lastTime = Date.now()
-							return
-
-						default:
-							const found = await commandsColl.findOne({
-								name: command,
-							});
-							if (!found) return;
-							const secondPass = await Mustache.render(
-								found.response,
-								{
-									count: async () => {
-										return found?.counter || 0;
-									},
-								},
-								null,
-								["${", "}"]
-							);
-
-							sendMsg(secondPass);
-							await commandsColl.updateOne(
-								{
-									name: command,
-								},
-								{
-									$inc: { counter: 1 },
-								}
-							);
-							return;
 					}
 				} else {
 					const triggerFound = triggers.find((x) => message.includes(x.name));
@@ -345,6 +384,7 @@ async function main() {
 			await main();
 		} catch (e) {
 			console.error("CHECKING: ", e);
+			// Recon error is for restarting the application
 			if (e !== "RECON") {
 				console.error(e);
 				process.exit(1);
@@ -353,19 +393,20 @@ async function main() {
 	}
 })();
 
-async function update(coll, name, response) {
-	const sett = {
+/** Update a document in a collection */
+async function updateItem(collection, name, value) {
+	const objectToSet = {
 		name,
-		response,
+		response: value,
 	};
-	if (!response) delete sett.response;
+	if (!value) delete objectToSet.response;
 
-	await coll.updateOne(
+	await collection.updateOne(
 		{
 			name,
 		},
 		{
-			$set: sett,
+			$set: objectToSet,
 		},
 		{
 			upsert: true,
@@ -373,6 +414,7 @@ async function update(coll, name, response) {
 	);
 }
 
-async function del(coll, name) {
-	await coll.deleteOne({ name });
+/** Delete item from collection */
+async function deleteItem(collection, name) {
+	await collection.deleteOne({ name });
 }
