@@ -198,6 +198,16 @@ async function main() {
 			if (users.find((x) => x.name === username)) {
 				if (message[0] === "%") {
 					switch (command) {
+						case "hug":
+							return sendMsg(`${displayName} hugs ${firstArg} <3 cjoet`)
+
+						case "top":
+							const resultTop = await usersColl.find({}).sort([["counter", -1]]).limit(5).toArray()
+							return sendMsg(resultTop.reduce((acc, val) => {
+								acc += `${acc.length === 0 ? "" : " | "}${val.name} zit op ${val.counter}`
+								return acc
+							}, ""))
+
 						case "counter":
 							const splitted = message.split(" ");
 							const userName =
@@ -240,18 +250,23 @@ async function main() {
 							// Return in json and without images(Plaintext)
 							const wraData = (await axios.default.get(`http://api.wolframalpha.com/v2/query?input=${encodeURIComponent(messageArgs)}&appid=${process.env.WRA_KEY}&includepodid=Solution&includepodid=Result&includepodid=Definitions&includepodid=Definition:WordData&output=json&format=plaintext&translation=true&reinterpret=true`)).data
 							console.log(wraData)
+
+							//WRA response failure
 							if (!wraData || wraData?.queryresult?.error) {
 								return sendMsg("YEP wolfram pakot")
 							}
+
+							//Error from WRA response
 							if (wraData.queryresult.error || !wraData.queryresult.success) {
 								return sendMsg("Hmmm ik begrijp je vraag niet. (Moet engels zijn (: )")
 							}
+
+							// Pods errors
 							const res = wraData?.queryresult?.pods
 							if (!res) {
 								return sendMsg("Er is helaas geen resultaat. Of je vraag is niet goed of er is bijvoorbeeld geen reeël resultaat")
 							}
 							const resPod = res[0]
-							console.log(resPod)
 							if (!resPod || !resPod?.subpods || resPod?.subpods?.length < 1) {
 								return sendMsg("Er is geen resultaat Sadge")
 							}
@@ -263,7 +278,7 @@ async function main() {
 							if (outputString.length > 50) {
 								return sendMsg("Sorry het antwoord is te lang")
 							}
-							sendMsg(`Het antwoord is: ${outputString}`)
+							sendMsg(`Het antwoord is: ${outputString.slice(0, 50)}${outputString.length > 50 ? "..." : ""}`)
 							lastTime = Date.now()
 							return
 
