@@ -61,7 +61,7 @@ async function main() {
 		client.on("message", async (channel, tags, message, self) => {
 			const { username, "display-name": displayName } = tags;
 			const sendMsg = (...rest) => client.say(channel, `@${username}, ${rest.join(' ')}`);
-			if (self) return;
+			if (self || username === process.env.TMI_USER) return;
 
 			const tempCommand = message
 				.match(/\%\w+|\w+|"[^"]+"/g)
