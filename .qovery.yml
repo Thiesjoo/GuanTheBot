@@ -1,0 +1,11 @@
+---
+application:
+  name: "twitchtestbot"
+  project: "twitchTestBot"
+  organization: "QoveryCommunity"
+routers:
+- name: "main-twitchtestbot"
+  routes:
+  - application_name: "twitchtestbot"
+    paths:
+    - "/*"
