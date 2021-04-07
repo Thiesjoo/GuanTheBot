@@ -138,10 +138,25 @@ async function main() {
 					}
 
 					case "info": {
-						console.log("INFO REQUESTED");
+						console.log("INFO REQUESTED", process.env);
 						sendMsg(`Hostname: ${os.hostname()}`);
 						return;
 					}
+
+					case "testdb": {
+						try {
+							let db = await MongoClient.connect(process.env.QOVERY_DATABASE_MY_MONGODB_CONNECTION_URI, {
+								useUnifiedTopology: true,
+							})
+							console.log("Conencted to db", db)
+							sendMsg('test')
+						} catch (e) {
+							console.error(e)
+						}
+						return;
+					}
+
+
 					case "editreaction":
 					case "addreaction": {
 						return await updateItem(reactionsColl, firstArg, args);
