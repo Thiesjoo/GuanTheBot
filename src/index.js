@@ -242,6 +242,16 @@ async function main() {
 							);
 						}
 
+
+						case 'omega': {
+							const messageArgsAsks = message.split(" ");
+							messageArgsAsks?.shift();
+							const messageArgs = messageArgsAsks?.join(" ");
+
+							sendMsg(messageArgs.replace(/o/g, " OMEGALUL "))
+							return;
+						}
+
 						case "counter": {
 							if (taggedUsername === "triggers") {
 								sendMsg(
