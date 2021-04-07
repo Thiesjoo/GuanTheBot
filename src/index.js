@@ -9,6 +9,7 @@ const axios = require("axios").default;
 const MongoClient = require("mongodb").MongoClient;
 
 let lastTime = 0;
+console.log(process.env.QOVERY_DATABASE_MY_MONGODB_CONNECTION_URI)
 
 async function main() {
 	return new Promise(async (done, err) => {
@@ -19,9 +20,9 @@ async function main() {
 		).db(process.env.MONGO_DB);
 
 		// All the channels to listen for
-		const listening = (
-			await db.collection("listening").find({}).toArray()
-		).map((x) => x.name);
+		const listening = (await db.collection("listening").find({}).toArray()).map(
+			(x) => x.name
+		);
 
 		const client = new tmi.Client({
 			identity: {
@@ -103,18 +104,17 @@ async function main() {
 						return;
 					}
 
-					case "addToUser":
-						{
-							await usersColl.updateOne(
-								{ name: taggedUsername },
-								{
-									$inc: {
-										counter: +args || 1 // Convert the second arg to a number, or just add 1 if it is not defined
-									}
-								}
-							);
-							return;
-						}
+					case "addToUser": {
+						await usersColl.updateOne(
+							{ name: taggedUsername },
+							{
+								$inc: {
+									counter: +args || 1, // Convert the second arg to a number, or just add 1 if it is not defined
+								},
+							}
+						);
+						return;
+					}
 
 					case "dumpTHISISARANDOMSTRINGPLSNORESTORE": {
 						if (process.env.NODE_ENV !== "production") {
@@ -169,32 +169,29 @@ async function main() {
 					}
 
 					case "editcmd":
-					case "addcmd":
-						{
-							return await updateItem(commandsColl, firstArg, args);
-						}
-					case "delcmd":
-						{
-							return await deleteItem(commandsColl, firstArg);
-						}
+					case "addcmd": {
+						return await updateItem(commandsColl, firstArg, args);
+					}
+					case "delcmd": {
+						return await deleteItem(commandsColl, firstArg);
+					}
 
-					case "cmdcounter":
-						{
-							const numberToSet = parseInt(args);
-							if (!numberToSet) {
-								console.error("Not a number", args);
-								return;
-							}
-							await commandsColl.updateOne(
-								{
-									name: firstArg,
-								},
-								{
-									$set: { counter: numberToSet },
-								}
-							);
+					case "cmdcounter": {
+						const numberToSet = parseInt(args);
+						if (!numberToSet) {
+							console.error("Not a number", args);
 							return;
 						}
+						await commandsColl.updateOne(
+							{
+								name: firstArg,
+							},
+							{
+								$set: { counter: numberToSet },
+							}
+						);
+						return;
+					}
 
 					case "trust": {
 						await updateItem(usersColl, firstArg);
@@ -212,141 +209,138 @@ async function main() {
 			if (users.find((x) => x.name === username)) {
 				if (message[0] === "%") {
 					switch (command) {
-						case "hug":
-							{
-								return sendMsg(`${displayName} hugs ${firstArg} <3 cjoet`);
-							}
-						case "top":
-							{
-								const resultTop = await usersColl
-									.find({})
-									.sort([["counter", -1]])
-									.limit(5)
-									.toArray();
-								return sendMsg(
-									resultTop.reduce((acc, val) => {
-										acc += `${acc.length === 0 ? "" : " | "}${val.name} zit op ${val.counter
-											}`;
-										return acc;
-									}, "")
-								);
-							}
+						case "hug": {
+							return sendMsg(`${displayName} hugs ${firstArg} <3 cjoet`);
+						}
+						case "top": {
+							const resultTop = await usersColl
+								.find({})
+								.sort([["counter", -1]])
+								.limit(5)
+								.toArray();
+							return sendMsg(
+								resultTop.reduce((acc, val) => {
+									acc += `${acc.length === 0 ? "" : " | "}${val.name} zit op ${val.counter
+										}`;
+									return acc;
+								}, "")
+							);
+						}
 
-						case "counter":
-							{
-								if (taggedUsername === "triggers") {
-									sendMsg(
-										`Er zijn nu al ${triggers.length} triggers in de database`
-									);
-									return;
-								}
-								const foundUser = await usersColl.findOne({ name: taggedUsername });
-								if (!foundUser) {
-									return sendMsg("User niet gevonden in database");
-								}
-								return sendMsg(
-									`${taggedUsername} heeft nu al ${foundUser.counter} iets verkeerd getypdt`
-								);
-							}
-
-						case "ask":
-							{
-								if (Date.now() - lastTime < 10 * 1000) {
-									sendMsg("Sorry wolfram heeft timeout. Eventjes wachten (:");
-									return;
-								}
-
-								const messageArgsAsks = message.split(" ");
-								messageArgsAsks?.shift();
-								const messageArgs = messageArgsAsks?.join(" ");
-
-								if (!messageArgs) {
-									return sendMsg("Je moet wel een vraag stellen (: ");
-								}
-
-								console.log("Args: ", encodeURIComponent(messageArgs));
-								// Encode input as URI component
-								// Include our appID
-								// Only include Solution and Result Pods
-								// Return in json and without images(Plaintext)
-								const wraData = (
-									await axios.default.get(
-										`http://api.wolframalpha.com/v2/query?input=${encodeURIComponent(
-											messageArgs
-										)}&appid=${process.env.WRA_KEY
-										}&includepodid=Solution&includepodid=Result&includepodid=Definitions&includepodid=Definition:WordData&output=json&format=plaintext&translation=true&reinterpret=true`
-									)
-								).data;
-								console.log(wraData);
-
-								//WRA response failure
-								if (!wraData || wraData?.queryresult?.error) {
-									return sendMsg("YEP wolfram pakot");
-								}
-
-								//Error from WRA response
-								if (wraData.queryresult.error || !wraData.queryresult.success) {
-									return sendMsg(
-										"Hmmm ik begrijp je vraag niet. (Moet engels zijn (: )"
-									);
-								}
-
-								// Pods errors
-								const res = wraData?.queryresult?.pods;
-								if (!res) {
-									return sendMsg(
-										"Er is helaas geen resultaat. Of je vraag is niet goed of er is bijvoorbeeld geen reeël resultaat"
-									);
-								}
-								const resPod = res[0];
-								if (!resPod || !resPod?.subpods || resPod?.subpods?.length < 1) {
-									return sendMsg("Er is geen resultaat Sadge");
-								}
-
-								let outputString = "";
-								resPod.subpods.forEach((x) => {
-									outputString += x.plaintext
-										? (outputString.length === 0 ? "" : " v ") + x.plaintext
-										: "";
-								});
-								if (outputString.length > 50) {
-									return sendMsg("Sorry het antwoord is te lang");
-								}
-								lastTime = Date.now();
-								return sendMsg(
-									`Het antwoord is: ${outputString.slice(0, 50)}${outputString.length > 50 ? "..." : ""
-									}`
-								);
-							}
-
-						default:
-							{
-								const foundCommand = await commandsColl.findOne({
-									name: command,
-								});
-								if (!foundCommand) return;
-								const parsedCommand = await Mustache.render(
-									foundCommand.response,
-									{
-										count: async () => {
-											return foundCommand?.counter || 0;
-										},
-									},
-									null,
-									["${", "}"]
-								);
-
-								sendMsg(parsedCommand);
-								await commandsColl.updateOne(
-									{
-										name: command,
-									},
-									{
-										$inc: { counter: 1 },
-									}
+						case "counter": {
+							if (taggedUsername === "triggers") {
+								sendMsg(
+									`Er zijn nu al ${triggers.length} triggers in de database`
 								);
 								return;
 							}
+							const foundUser = await usersColl.findOne({
+								name: taggedUsername,
+							});
+							if (!foundUser) {
+								return sendMsg("User niet gevonden in database");
+							}
+							return sendMsg(
+								`${taggedUsername} heeft nu al ${foundUser.counter} iets verkeerd getypdt`
+							);
+						}
+
+						case "ask": {
+							if (Date.now() - lastTime < 10 * 1000) {
+								sendMsg("Sorry wolfram heeft timeout. Eventjes wachten (:");
+								return;
+							}
+
+							const messageArgsAsks = message.split(" ");
+							messageArgsAsks?.shift();
+							const messageArgs = messageArgsAsks?.join(" ");
+
+							if (!messageArgs) {
+								return sendMsg("Je moet wel een vraag stellen (: ");
+							}
+
+							console.log("Args: ", encodeURIComponent(messageArgs));
+							// Encode input as URI component
+							// Include our appID
+							// Only include Solution and Result Pods
+							// Return in json and without images(Plaintext)
+							const wraData = (
+								await axios.default.get(
+									`http://api.wolframalpha.com/v2/query?input=${encodeURIComponent(
+										messageArgs
+									)}&appid=${process.env.WRA_KEY
+									}&includepodid=Solution&includepodid=Result&includepodid=Definitions&includepodid=Definition:WordData&output=json&format=plaintext&translation=true&reinterpret=true`
+								)
+							).data;
+							console.log(wraData);
+
+							//WRA response failure
+							if (!wraData || wraData?.queryresult?.error) {
+								return sendMsg("YEP wolfram pakot");
+							}
+
+							//Error from WRA response
+							if (wraData.queryresult.error || !wraData.queryresult.success) {
+								return sendMsg(
+									"Hmmm ik begrijp je vraag niet. (Moet engels zijn (: )"
+								);
+							}
+
+							// Pods errors
+							const res = wraData?.queryresult?.pods;
+							if (!res) {
+								return sendMsg(
+									"Er is helaas geen resultaat. Of je vraag is niet goed of er is bijvoorbeeld geen reeël resultaat"
+								);
+							}
+							const resPod = res[0];
+							if (!resPod || !resPod?.subpods || resPod?.subpods?.length < 1) {
+								return sendMsg("Er is geen resultaat Sadge");
+							}
+
+							let outputString = "";
+							resPod.subpods.forEach((x) => {
+								outputString += x.plaintext
+									? (outputString.length === 0 ? "" : " v ") + x.plaintext
+									: "";
+							});
+							if (outputString.length > 50) {
+								return sendMsg("Sorry het antwoord is te lang");
+							}
+							lastTime = Date.now();
+							return sendMsg(
+								`Het antwoord is: ${outputString.slice(0, 50)}${outputString.length > 50 ? "..." : ""
+								}`
+							);
+						}
+
+						default: {
+							const foundCommand = await commandsColl.findOne({
+								name: command,
+							});
+							if (!foundCommand) return;
+							const parsedCommand = await Mustache.render(
+								foundCommand.response,
+								{
+									count: async () => {
+										return foundCommand?.counter || 0;
+									},
+								},
+								null,
+								["${", "}"]
+							);
+
+							sendMsg(parsedCommand);
+							await commandsColl.updateOne(
+								{
+									name: command,
+								},
+								{
+									$inc: { counter: 1 },
+								}
+							);
+							return;
+						}
 					}
 				} else {
 					const triggerFound = triggers.find((x) => message.includes(x.name));

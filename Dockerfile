@@ -22,10 +22,9 @@ RUN chown node:node /usr/src && \
 
 COPY --from=deps --chown=node:node deps.json ./package.json
 COPY --from=deps --chown=node:node deps-lock.json ./package-lock.json
-COPY src/ dist/
-
 RUN npm ci --only=production
 
+COPY src/ dist/
 USER node
 
 ENTRYPOINT ["dumb-init", "--"]
