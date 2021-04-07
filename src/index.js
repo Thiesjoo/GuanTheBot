@@ -145,7 +145,7 @@ async function main() {
 
 					case "testdb": {
 						try {
-							let db = await MongoClient.connect(process.env.QOVERY_DATABASE_MY_MONGODB_CONNECTION_URI + "&ssl_ca_certs=/usr/src/rds-combined-ca-bundle.pem", {
+							let db = await MongoClient.connect(process.env.QOVERY_DATABASE_MY_MONGODB_CONNECTION_URI + "?ssl_ca_certs=/usr/src/rds-combined-ca-bundle.pem", {
 								useUnifiedTopology: true,
 							})
 							console.log("Conencted to db", db)
