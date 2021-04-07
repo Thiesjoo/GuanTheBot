@@ -18,7 +18,9 @@ FROM node:${NODE_VERSION}-alpine${ALPINE_VERSION} as production
 WORKDIR /usr/src
 
 RUN chown node:node /usr/src && \
-  apk add --no-cache dumb-init mongodb-tools
+  apk add --no-cache dumb-init mongodb-tools wget
+
+RUN wget https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem
 
 COPY --from=deps --chown=node:node deps.json ./package.json
 COPY --from=deps --chown=node:node deps-lock.json ./package-lock.json
