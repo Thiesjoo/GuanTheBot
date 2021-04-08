@@ -6,10 +6,16 @@
 		"emitDecoratorMetadata": true,
 		"experimentalDecorators": true,
 		"allowSyntheticDefaultImports": true,
-		"target": "es2019",
+		"target": "es2017",
 		"sourceMap": true,
-		"baseUrl": "./",
 		"outDir": "./dist",
-		"incremental": true
-	}
+		"baseUrl": ".",
+		"rootDir": "./src",
+		"incremental": true,
+		"paths": {
+			"src/*": ["./src/*"],
+			"@services/*": ["./src/services/*"]
+		}
+	},
+	"include": ["./src/**/*"]
 }

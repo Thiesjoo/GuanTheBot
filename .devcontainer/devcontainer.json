@@ -14,7 +14,7 @@
 	],
 	"postCreateCommand": "npm ci",
 	"remoteUser": "vscode",
-	"workspaceFolder": "/twitchtestbot",
+	"workspaceFolder": "/workspace",
 	"remoteEnv": {
 		"LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
 	}
