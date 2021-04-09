@@ -1,5 +1,5 @@
-import { AutoInjectable, Singleton } from "src/helpers/tsyringe.reexport";
-import { Listening, User, Trigger, Command, Reaction } from "src/helpers/types";
+import { AutoInjectable, Singleton } from "@helpers/tsyringe.reexport";
+import { Listening, User, Trigger, Command, Reaction } from "@helpers/types";
 import { DatabaseService } from "./mongoDB";
 
 @Singleton()

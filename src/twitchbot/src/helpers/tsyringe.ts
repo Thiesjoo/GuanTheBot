@@ -1,5 +1,5 @@
-import { DatabaseService } from "src/services/mongoDB";
-import { TwitchIRCService } from "src/services/twitchIRC";
+import { DatabaseService } from "@services/mongoDB";
+import { TwitchIRCService } from "@services/twitchIRC";
 import {
 	autoInjectable,
 	container,

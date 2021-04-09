@@ -1,4 +1,4 @@
-import { Command } from "src/helpers/types";
+import { Command } from "@helpers/types";
 import { parseCommand } from "../parseCommands";
 
 const commands: Command[] = [

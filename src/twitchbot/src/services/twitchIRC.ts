@@ -1,10 +1,10 @@
-import { ConfigService } from "src/helpers/configuration";
-import { AutoInjectable } from "src/helpers/tsyringe.reexport";
+import { ConfigService } from "@helpers/configuration";
+import { AutoInjectable } from "@helpers/tsyringe.reexport";
 import { Client } from "tmi.js";
 import { DBStorageService } from "./storageService";
 import ExtraCommands from "../commands/index.twitch";
 import { DatabaseService } from "./mongoDB";
-import { Command } from "src/helpers/types";
+import { Command } from "@helpers/types";
 // @ts-ignore
 import * as Mustache from "mustache-async";
 @AutoInjectable()

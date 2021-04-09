@@ -1,8 +1,7 @@
-import { ConfigService } from "src/helpers/configuration";
-import { AutoInjectable, Singleton } from "src/helpers/tsyringe.reexport";
-
+import { ConfigService } from "@helpers/configuration";
+import { AutoInjectable, Singleton } from "@helpers/tsyringe.reexport";
+import { User, Command, Listening, Reaction, Trigger } from "@helpers/types";
 import { Db, MongoClient } from "mongodb";
-import { User, Command, Listening, Reaction, Trigger } from "src/helpers/types";
 
 interface Collections {
 	triggers: Trigger[];

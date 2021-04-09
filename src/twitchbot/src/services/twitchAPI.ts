@@ -1,4 +1,4 @@
-import { AutoInjectable } from "src/helpers/tsyringe.reexport";
+import { AutoInjectable } from "@helpers/tsyringe.reexport";
 import { DatabaseService } from "./mongoDB";
 
 @AutoInjectable()
