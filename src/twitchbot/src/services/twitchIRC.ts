@@ -15,8 +15,7 @@ export class TwitchIRCService {
 
 	constructor(
 		private config: ConfigService,
-		private dbStorage: DBStorageService,
-		private db: DatabaseService
+		private dbStorage: DBStorageService
 	) {}
 
 	/** Initialize twitch client */
@@ -67,6 +66,8 @@ export class TwitchIRCService {
 				const username = _username || "";
 				const displayName = _displayName || "";
 				if (self || username === this.config.tmiIdentity.username) return;
+
+				if (!this.dbStorage.users.find((x) => x.name === username)) return;
 
 				// Parse the command. Will return array with ['command', ...args]
 				const tempCommand = message
