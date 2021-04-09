@@ -10,7 +10,7 @@ function get(from: any, key: any): any[] {
 @Singleton()
 @AutoInjectable()
 export class DBStorageService {
-	trustedUsers: User[] = [];
+	users: User[] = [];
 	listeners: Listening[] = [];
 
 	triggers: Trigger[] = [];
@@ -25,13 +25,13 @@ export class DBStorageService {
 		this.reactions = await this.db.getAllReactions();
 		this.commands = await this.db.getAllCommands();
 		this.listeners = await this.db.getAllListeners();
-		this.trustedUsers = await this.db.getAllUsers();
+		this.users = await this.db.getAllUsers();
 	}
 
 	async updateGeneral<T extends keyof Collections>(
 		collection: T,
 		name: string,
-		update: Collections[T]
+		update: Partial<Collections[T]>
 	) {
 		const col = get(this, collection);
 		if (!col) return console.error(collection, this, "Went wrong");
@@ -51,7 +51,7 @@ export class DBStorageService {
 			{ $set: update },
 			true
 		);
-		return false;
+		return true;
 	}
 
 	async deleteGeneral<T extends keyof Collections>(
@@ -71,6 +71,7 @@ export class DBStorageService {
 					name: name,
 				}
 			);
+			return true;
 		}
 		return false;
 	}
@@ -97,7 +98,7 @@ export class DBStorageService {
 	}
 
 	async increaseUser(username: string, count: number) {
-		let res = this.trustedUsers.find((x) => x.name === username);
+		let res = this.users.find((x) => x.name === username);
 		if (res) {
 			res.counter += count;
 			await this.db.updateOne(

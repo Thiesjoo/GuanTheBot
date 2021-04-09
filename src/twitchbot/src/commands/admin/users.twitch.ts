@@ -33,7 +33,7 @@ const commands: Command[] = [
 				return `Er zijn nu al ${storage.triggers.length} triggers in de database`;
 			}
 
-			let user = storage.trustedUsers.find(
+			let user = storage.users.find(
 				(x) => x.name === taggedUsername.toLowerCase()
 			);
 			if (!user) {
@@ -44,16 +44,47 @@ const commands: Command[] = [
 	},
 	{
 		name: "top",
+		reaction: false,
 		response: () => {
 			const storage = container.resolve(DBStorageService);
-			storage.trustedUsers.sort((a, b) => b.counter - a.counter);
-			return storage.trustedUsers.reduce((acc, val, i) => {
+			storage.users.sort((a, b) => b.counter - a.counter);
+			return storage.users.reduce((acc, val, i) => {
 				if (i > 2) return acc;
 				acc += `${acc.length === 0 ? "" : " | "}${val.name} zit op ${
 					val.counter || 0
 				}`;
 				return acc;
 			}, "");
+		},
+	},
+	{
+		name: "trust",
+		admin: true,
+		reaction: false,
+		response: async (message, userState) => {
+			const { firstArg } = parseCommand(message, userState);
+			if (!firstArg) return "Please provide a user";
+			const storage = container.resolve(DBStorageService);
+			await storage.updateGeneral("users", firstArg.toLowerCase(), {
+				name: firstArg.toLowerCase(),
+			});
+			return `@${firstArg}, welcome to the typo gang`;
+		},
+	},
+	{
+		name: "untrust",
+		admin: true,
+		reaction: false,
+		response: async (message, userState) => {
+			const { firstArg } = parseCommand(message, userState);
+			if (!firstArg) return "Please provide a user";
+			const storage = container.resolve(DBStorageService);
+			let res = await storage.deleteGeneral("users", firstArg.toLowerCase());
+			if (!res) {
+				console.error("Untrust failed:", message, storage);
+				return "fuck";
+			}
+			return `@${firstArg}, d'doei`;
 		},
 	},
 ];

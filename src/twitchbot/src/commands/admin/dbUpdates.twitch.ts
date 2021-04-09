@@ -7,7 +7,7 @@ import { parseCommand } from "../parseCommands";
 import * as os from "os";
 
 const commands: Command[] = [
-	//Set cmd counter,
+	//TODO: Set cmd counter,
 	// Get cmd counter
 	{
 		name: "listen",
