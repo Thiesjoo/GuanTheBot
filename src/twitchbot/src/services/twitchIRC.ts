@@ -63,7 +63,7 @@ export class TwitchIRCService {
 		//Never ending promise
 		return new Promise((_) => {
 			this.client.on("message", async (channel, userState, message, self) => {
-				const { _username, "display-name": _displayName } = userState;
+				const { username: _username, "display-name": _displayName } = userState;
 				const username = _username || "";
 				const displayName = _displayName || "";
 				if (self || username === this.config.tmiIdentity.username) return;
@@ -98,7 +98,7 @@ export class TwitchIRCService {
 					if (res && typeof res.response === "string") {
 						toSend = res.response;
 					} else if (res && typeof res.response === "function") {
-						toSend = await res.response(message, userState);
+						toSend = (await res.response(message, userState)) || "";
 					} else {
 						return console.error("Command not found");
 					}
@@ -126,7 +126,8 @@ export class TwitchIRCService {
 						}
 
 						// Update the user counter
-						await this.db.increaseUser(username);
+						const res = await this.dbStorage.increaseUser(username, 1);
+						console.log("Reacion res: ", res, username, userState);
 					}
 					return;
 				}
@@ -136,8 +137,9 @@ export class TwitchIRCService {
 
 	/** Replace count variable in the  */
 	private async replaceVariables(msg: Command): Promise<string> {
-		if (typeof msg.response === "string") {
+		if (typeof msg.response !== "string") {
 			console.error("GOT WRONG RESPONSE");
+			return "";
 		}
 		return await Mustache.render(
 			typeof msg.response === "string" ? msg.response : "",

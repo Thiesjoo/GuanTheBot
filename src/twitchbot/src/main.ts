@@ -55,6 +55,7 @@ async function main() {
 	//Init discord bot
 
 	await ircService.listenForMessages();
+	console.log("end of main");
 }
 
 process.stdin.resume(); //so the program will not close instantly

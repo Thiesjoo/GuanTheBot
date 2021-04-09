@@ -31,4 +31,8 @@ export class ConfigService {
 	get adminUser() {
 		return process.env.ADMIN_USER || "guanthethird";
 	}
+
+	get wraKey() {
+		return process.env.WRA_KEY || "";
+	}
 }

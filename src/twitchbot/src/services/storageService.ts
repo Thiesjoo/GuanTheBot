@@ -1,5 +1,6 @@
 import { AutoInjectable, Singleton } from "@helpers/tsyringe.reexport";
 import { Listening, User, Trigger, Command, Reaction } from "@helpers/types";
+import { UpdateQuery } from "mongodb";
 import { DatabaseService } from "./mongoDB";
 
 @Singleton()
@@ -42,5 +43,25 @@ export class DBStorageService {
 			});
 		}
 		return;
+	}
+
+	async increaseUser(username: string, count: number) {
+		let res = this.trustedUsers.find((x) => x.name === username);
+		if (res) {
+			res.counter += count;
+			await this.db.updateOne(
+				"users",
+				{
+					name: username,
+				},
+				{
+					$inc: {
+						counter: count,
+					},
+				}
+			);
+			return true;
+		}
+		return false;
 	}
 }

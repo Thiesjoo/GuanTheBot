@@ -1,7 +1,7 @@
 import { ConfigService } from "@helpers/configuration";
 import { AutoInjectable, Singleton } from "@helpers/tsyringe.reexport";
 import { User, Command, Listening, Reaction, Trigger } from "@helpers/types";
-import { Db, FilterQuery, MongoClient } from "mongodb";
+import { Db, FilterQuery, MongoClient, UpdateQuery } from "mongodb";
 
 interface Collections {
 	triggers: Trigger;
@@ -63,21 +63,20 @@ export class DatabaseService {
 		return await this.connection?.collection(collection).insertMany(docs);
 	}
 
+	async updateOne<T extends keyof Collections>(
+		collection: T,
+		filter: FilterQuery<Collections[T]>,
+		update: UpdateQuery<Collections[T]>
+	) {
+		return await this.connection
+			?.collection(collection)
+			.updateOne(filter, update);
+	}
+
 	async deleteOne<T extends keyof Collections>(
 		collection: T,
 		doc: Collections[T]
 	): Promise<any> {
 		return await this.connection?.collection(collection).deleteOne(doc);
-	}
-
-	async increaseUser(username: string) {
-		return this.connection?.collection("users").updateOne(
-			{
-				name: username,
-			},
-			{
-				$inc: { counter: 1 },
-			}
-		);
 	}
 }
