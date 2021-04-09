@@ -4,7 +4,7 @@ export type Base = { name: string; response: string };
 
 export type Trigger = Base;
 export type Command = {
-	name: string;
+	name: string | string[];
 	counter?: number;
 	admin?: boolean;
 	reaction?: boolean;
@@ -13,7 +13,8 @@ export type Command = {
 				message: string,
 				userState: ChatUserstate
 		  ) => void | string | Promise<string | void>)
-		| string;
+		| string
+		| null;
 };
 export type User = { name: string; counter: number };
 export type Reaction = Base;

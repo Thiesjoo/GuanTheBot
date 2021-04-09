@@ -3,7 +3,7 @@ import { AutoInjectable, Singleton } from "@helpers/tsyringe.reexport";
 import { User, Command, Listening, Reaction, Trigger } from "@helpers/types";
 import { Db, FilterQuery, MongoClient, UpdateQuery } from "mongodb";
 
-interface Collections {
+export interface Collections {
 	triggers: Trigger;
 	commands: Command;
 	users: User;
@@ -66,11 +66,12 @@ export class DatabaseService {
 	async updateOne<T extends keyof Collections>(
 		collection: T,
 		filter: FilterQuery<Collections[T]>,
-		update: UpdateQuery<Collections[T]>
+		update: UpdateQuery<Collections[T]>,
+		upsert = false
 	) {
 		return await this.connection
 			?.collection(collection)
-			.updateOne(filter, update);
+			.updateOne(filter, update, { upsert });
 	}
 
 	async deleteOne<T extends keyof Collections>(

@@ -73,14 +73,18 @@ export class TwitchIRCService {
 					.match(/\%\w+|\w+|"[^"]+"/g)
 					?.map((x) => x.replace(/\"/g, ""));
 
-				const command = tempCommand?.shift()?.slice(1);
+				const command = tempCommand?.shift()?.slice(1) || "";
 
 				if (message[0] === "%") {
 					let res: Command | undefined;
 
 					//Admin commands
 					if (username === this.config.adminUser) {
-						res = this.extraCommands.find((x) => x.admin && x.name === command);
+						res = this.extraCommands.find((x) =>
+							x.admin && typeof x.name === "string"
+								? x.name === command
+								: x.name.includes(command)
+						);
 					}
 
 					//User special commands

@@ -1,7 +1,11 @@
 import { AutoInjectable, Singleton } from "@helpers/tsyringe.reexport";
 import { Listening, User, Trigger, Command, Reaction } from "@helpers/types";
 import { UpdateQuery } from "mongodb";
-import { DatabaseService } from "./mongoDB";
+import { Collections, DatabaseService } from "./mongoDB";
+
+function get(from: any, key: any): any[] {
+	return from[key];
+}
 
 @Singleton()
 @AutoInjectable()
@@ -22,6 +26,53 @@ export class DBStorageService {
 		this.commands = await this.db.getAllCommands();
 		this.listeners = await this.db.getAllListeners();
 		this.trustedUsers = await this.db.getAllUsers();
+	}
+
+	async updateGeneral<T extends keyof Collections>(
+		collection: T,
+		name: string,
+		update: Collections[T]
+	) {
+		const col = get(this, collection);
+		if (!col) return console.error(collection, this, "Went wrong");
+
+		let res = col.findIndex((x) => x.name === name);
+		if (res > -1) {
+			col.splice(res, 1, update);
+		} else {
+			col.push(update);
+		}
+		await this.db.updateOne(
+			collection,
+			//@ts-ignore FIXME: Idk why typing doesnt work here
+			{
+				name: name,
+			},
+			{ $set: update },
+			true
+		);
+		return false;
+	}
+
+	async deleteGeneral<T extends keyof Collections>(
+		collection: T,
+		name: string
+	) {
+		const col = get(this, collection);
+		if (!col) return console.error(collection, this, "Went wrong");
+
+		let res = col.findIndex((x) => x.name === name);
+		if (res > -1) {
+			col.splice(res, 1);
+			await this.db.deleteOne(
+				collection,
+				//@ts-ignore FIXME: Idk why typing doesnt work here
+				{
+					name: name,
+				}
+			);
+		}
+		return false;
 	}
 
 	async addNewListenChannel(arg: string) {
