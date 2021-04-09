@@ -1,4 +1,4 @@
-import { Userstate } from "tmi.js";
+import { ChatUserstate, Userstate } from "tmi.js";
 
 export type Base = { name: string; response: string };
 
@@ -9,7 +9,10 @@ export type Command = {
 	admin?: boolean;
 	reaction?: boolean;
 	response:
-		| ((message: string, userState: Userstate) => Promise<string>)
+		| ((
+				message: string,
+				userState: ChatUserstate
+		  ) => void | string | Promise<string | void>)
 		| string;
 };
 export type User = { name: string; counter: number };

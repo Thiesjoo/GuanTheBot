@@ -22,4 +22,25 @@ export class DBStorageService {
 		this.listeners = await this.db.getAllListeners();
 		this.trustedUsers = await this.db.getAllUsers();
 	}
+
+	async addNewListenChannel(arg: string) {
+		this.listeners.push({ name: arg });
+		await this.db.insertMany("listening", [
+			{
+				name: arg,
+			},
+		]);
+		return;
+	}
+
+	async removeNewListenChannel(arg: string) {
+		let res = this.listeners.findIndex((x) => x.name === arg);
+		if (res > -1) {
+			this.listeners.splice(res, 1);
+			await this.db.deleteOne("listening", {
+				name: arg,
+			});
+		}
+		return;
+	}
 }

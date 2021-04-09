@@ -1,14 +1,14 @@
 import { ConfigService } from "@helpers/configuration";
 import { AutoInjectable, Singleton } from "@helpers/tsyringe.reexport";
 import { User, Command, Listening, Reaction, Trigger } from "@helpers/types";
-import { Db, MongoClient } from "mongodb";
+import { Db, FilterQuery, MongoClient } from "mongodb";
 
 interface Collections {
-	triggers: Trigger[];
-	commands: Command[];
-	users: User[];
-	reactions: Reaction[];
-	listening: Listening[];
+	triggers: Trigger;
+	commands: Command;
+	users: User;
+	reactions: Reaction;
+	listening: Listening;
 }
 
 @AutoInjectable()
@@ -28,8 +28,8 @@ export class DatabaseService {
 
 	private async getAll<T extends keyof Collections>(
 		collection: T
-	): Promise<Collections[T]> {
-		const res: Collections[T] | undefined = await this.connection
+	): Promise<Collections[T][]> {
+		const res: Collections[T][] | undefined = await this.connection
 			?.collection(collection)
 			.find({})
 			.toArray();
@@ -54,6 +54,20 @@ export class DatabaseService {
 
 	async getAllListeners(): Promise<Listening[]> {
 		return this.getAll("listening");
+	}
+
+	async insertMany<T extends keyof Collections>(
+		collection: T,
+		docs: Collections[T][]
+	): Promise<any> {
+		return await this.connection?.collection(collection).insertMany(docs);
+	}
+
+	async deleteOne<T extends keyof Collections>(
+		collection: T,
+		doc: Collections[T]
+	): Promise<any> {
+		return await this.connection?.collection(collection).deleteOne(doc);
 	}
 
 	async increaseUser(username: string) {
