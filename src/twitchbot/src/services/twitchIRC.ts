@@ -67,7 +67,11 @@ export class TwitchIRCService {
 				const displayName = _displayName || "";
 				if (self || username === this.config.tmiIdentity.username) return;
 
-				if (!this.dbStorage.users.find((x) => x.name === username)) return;
+				if (
+					username !== this.config.adminUser &&
+					!this.dbStorage.users.find((x) => x.name === username)
+				)
+					return;
 
 				// Parse the command. Will return array with ['command', ...args]
 				const tempCommand = message

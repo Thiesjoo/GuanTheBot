@@ -16,9 +16,7 @@ const envPropsArr: (string | string[])[] = [
 ];
 
 async function main() {
-	process.env.NODE_ENV === "production"
-		? config()
-		: config({ path: "../../.env" });
+	config({ path: "../../.env" }); //ENV is stored at root
 
 	const env = Object.keys(process.env);
 	envPropsArr.forEach((x) => {
