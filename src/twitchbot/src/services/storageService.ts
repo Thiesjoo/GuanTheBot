@@ -11,7 +11,7 @@ function get(from: any, key: any): any[] {
 @AutoInjectable()
 export class DBStorageService {
 	users: User[] = [];
-	listeners: Listening[] = [];
+	listening: Listening[] = [];
 
 	triggers: Trigger[] = [];
 	reactions: Reaction[] = [];
@@ -24,7 +24,7 @@ export class DBStorageService {
 		this.triggers = await this.db.getAllTriggers();
 		this.reactions = await this.db.getAllReactions();
 		this.commands = await this.db.getAllCommands();
-		this.listeners = await this.db.getAllListeners();
+		this.listening = await this.db.getAllListeners();
 		this.users = await this.db.getAllUsers();
 	}
 
@@ -38,7 +38,10 @@ export class DBStorageService {
 
 		let res = col.findIndex((x) => x.name === name);
 		if (res > -1) {
-			col.splice(res, 1, update);
+			col.splice(res, 1, {
+				...col[res],
+				...update,
+			});
 		} else {
 			col.push(update);
 		}
@@ -76,27 +79,6 @@ export class DBStorageService {
 		return false;
 	}
 
-	async addNewListenChannel(arg: string) {
-		this.listeners.push({ name: arg });
-		await this.db.insertMany("listening", [
-			{
-				name: arg,
-			},
-		]);
-		return;
-	}
-
-	async removeNewListenChannel(arg: string) {
-		let res = this.listeners.findIndex((x) => x.name === arg);
-		if (res > -1) {
-			this.listeners.splice(res, 1);
-			await this.db.deleteOne("listening", {
-				name: arg,
-			});
-		}
-		return;
-	}
-
 	async increaseUser(username: string, count: number) {
 		let res = this.users.find((x) => x.name === username);
 		if (res) {
@@ -105,6 +87,27 @@ export class DBStorageService {
 				"users",
 				{
 					name: username,
+				},
+				{
+					$inc: {
+						counter: count,
+					},
+				}
+			);
+			return true;
+		}
+		return false;
+	}
+
+	async increaseCommandCounter(name: string, count: number) {
+		let res = this.commands.find((x) => x.name === name);
+		if (res) {
+			if (!res.counter) res.counter = 0;
+			res.counter += count;
+			await this.db.updateOne(
+				"commands",
+				{
+					name,
 				},
 				{
 					$inc: {

@@ -66,7 +66,6 @@ function exitHandler(
 ) {
 	console.log(options, exitCode);
 	if (options.cleanup) {
-		//TODO: Disconnect from all sockets
 		console.log("Cleaning up!");
 	}
 	if (exitCode || exitCode === 0) {

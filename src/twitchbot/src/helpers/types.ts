@@ -18,4 +18,4 @@ export type Command = {
 };
 export type User = { name: string; counter: number };
 export type Reaction = Base;
-export type Listening = { name: string };
+export type Listening = { name: string; lurk: boolean };

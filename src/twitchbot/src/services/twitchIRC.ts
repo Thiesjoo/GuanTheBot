@@ -28,7 +28,7 @@ export class TwitchIRCService {
 					secure: true,
 				},
 				channels: [
-					...this.dbStorage.listeners.map((x) => x.name),
+					...this.dbStorage.listening.map((x) => x.name),
 					this.config.tmiIdentity.username,
 					"guanthefirst",
 				],
@@ -108,12 +108,22 @@ export class TwitchIRCService {
 						return console.error("Command not found");
 					}
 
+					let foundChannel = this.dbStorage.listening.find(
+						(x) => x.name === channel.substr(1)
+					);
+					if (foundChannel && foundChannel.lurk !== undefined) {
+						if (foundChannel.lurk) return;
+					}
+
 					// Send reaction or just send a message
 					if (res.reaction || res.reaction === undefined) {
 						this.sendReaction(displayName, toSend, channel);
 					} else {
 						this.sendMessage(toSend, channel);
 					}
+					//@ts-ignore Res is always defined
+					this.dbStorage.increaseCommandCounter(res.name, 1);
+
 					return;
 				} else {
 					const triggerFound = this.dbStorage.triggers.find((x) =>
@@ -131,8 +141,7 @@ export class TwitchIRCService {
 						}
 
 						// Update the user counter
-						const res = await this.dbStorage.increaseUser(username, 1);
-						console.log("Reacion res: ", res, username, userState);
+						await this.dbStorage.increaseUser(username, 1);
 					}
 					return;
 				}

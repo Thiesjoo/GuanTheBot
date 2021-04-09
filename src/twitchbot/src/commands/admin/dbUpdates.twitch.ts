@@ -7,8 +7,41 @@ import { parseCommand } from "../parseCommands";
 import * as os from "os";
 
 const commands: Command[] = [
-	//TODO: Set cmd counter,
-	// Get cmd counter
+	{
+		name: "cmdcounter",
+		response: async (message, userState) => {
+			const { firstArg } = parseCommand(message, userState);
+			const storage = container.resolve(DBStorageService);
+			let res = storage.commands.find((x) => x.name === firstArg);
+			if (!res) {
+				return "Command with that name was not found";
+			}
+			return `${firstArg} is nu al ${res.counter} keer gebruikt`;
+		},
+	},
+	{
+		name: "setcmdcounter",
+		admin: true,
+		response: async (message, userState) => {
+			const { firstArg, args } = parseCommand(message, userState);
+			const storage = container.resolve(DBStorageService);
+			let res = storage.updateGeneral("commands", firstArg || "", {
+				counter: +args,
+			});
+			if (!res) {
+				return "Command with that name was not found";
+			}
+			return `${firstArg} updated`;
+		},
+	},
+	{
+		name: "refresh",
+		admin: true,
+		response: async () => {
+			const storage = container.resolve(DBStorageService);
+			storage.updateAll();
+		},
+	},
 	{
 		name: "listen",
 		response: async (message, userState) => {
@@ -37,13 +70,15 @@ async function listenGeneric(
 	userState: ChatUserstate,
 	remove: boolean
 ) {
-	const { taggedUsername } = parseCommand(message, userState);
+	const { taggedUsername, args } = parseCommand(message, userState);
 	const storage = container.resolve(DBStorageService);
 	const twitchIRC = container.resolve(TwitchIRCService);
 	let promises = [
-		storage[remove ? "removeNewListenChannel" : "addNewListenChannel"](
-			taggedUsername
-		),
+		remove
+			? storage.deleteGeneral("listening", taggedUsername)
+			: storage.updateGeneral("listening", taggedUsername, {
+					lurk: args === "true" ? true : false,
+			  }),
 		//Wrapping in promise to avoid ts errors
 		new Promise(async (resolve) =>
 			resolve(await twitchIRC.client[remove ? "part" : "join"](taggedUsername))
