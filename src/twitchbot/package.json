@@ -6,8 +6,8 @@
 	"main": "src/index.js",
 	"scripts": {
 		"start": "ts-node-dev --rs -P tsconfig.json -r tsconfig-paths/register src/main.ts",
-		"build": "tsc --build tsconfig.json && tspath -f",
-		"start:prod": "forever dist/main.js"
+		"build": "rm -rf dist/ && tsc && tscpaths -p tsconfig.json -s ./src -o ./dist ",
+		"start:prod": "node -r tsconfig-paths/register dist/main.js"
 	},
 	"author": "",
 	"license": "ISC",
@@ -18,19 +18,17 @@
 		"forever": "^3.0.4",
 		"mongodb": "^3.6.4",
 		"mustache-async": "^0.1.3",
+		"reflect-metadata": "^0.1.13",
 		"tmi.js": "^1.7.2",
-		"tsyringe": "^4.5.0",
-		"reflect-metadata": "^0.1.13"
+		"tscpaths": "0.0.9",
+		"tsyringe": "^4.5.0"
 	},
 	"devDependencies": {
-		"ts-node": "^9.1.1",
 		"typescript": "^4.2.4",
 		"@types/mongodb": "^3.6.12",
 		"@types/node": "^14.14.37",
 		"@types/tmi.js": "^1.7.1",
-		"nodemon": "^2.0.7",
 		"ts-node-dev": "^1.1.6",
-		"tsconfig-paths": "^3.9.0",
-		"tspath": "^1.3.7"
+		"tsconfig-paths": "^3.9.0"
 	}
 }

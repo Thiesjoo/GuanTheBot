@@ -6,20 +6,18 @@
 		"strict": true,
 		"strictPropertyInitialization": false,
 		"esModuleInterop": true,
-		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true,
 		"removeComments": true,
-		//DO NOT TOUCH UNDER HERE
 		"emitDecoratorMetadata": true,
 		"experimentalDecorators": true,
-		"outDir": "./dist",
-		"baseUrl": ".",
+		"outDir": "dist",
+		"baseUrl": "./",
 		"paths": {
-			"src/*": ["./src/*"],
+			"@helpers/*": ["./src/helpers/*"],
 			"@services/*": ["./src/services/*"]
 		},
 		"typeRoots": ["./src/types/mustache-async.d.ts"]
 	},
 	"include": ["./src/**/*"],
-	"exclude": ["./src/main2.ts"] //Extra file
+	"exclude": ["./src/main2.ts"]
 }
