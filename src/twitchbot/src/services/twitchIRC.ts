@@ -6,7 +6,6 @@ import ExtraCommands from "../commands/index.twitch";
 import { DatabaseService } from "./mongoDB";
 import { Command } from "src/helpers/types";
 import * as Mustache from "mustache-async";
-
 @AutoInjectable()
 export class TwitchIRCService {
 	client: Client;
@@ -14,9 +13,9 @@ export class TwitchIRCService {
 	extraCommands = ExtraCommands;
 
 	constructor(
-		private config?: ConfigService,
-		private dbStorage?: DBStorageService,
-		private db?: DatabaseService
+		private config: ConfigService,
+		private dbStorage: DBStorageService,
+		private db: DatabaseService
 	) {}
 
 	/** Initialize twitch client */
@@ -61,7 +60,9 @@ export class TwitchIRCService {
 	/** Listen for messages and check if user wants to execute command */
 	async listenForMessages() {
 		this.client.on("message", async (channel, userState, message, self) => {
-			const { username, "display-name": displayName } = userState;
+			const { _username, "display-name": _displayName } = userState;
+			const username = _username || "";
+			const displayName = _displayName || "";
 			if (self || username === this.config.tmiIdentity.username) return;
 
 			// Parse the command. Will return array with ['command', ...args]
@@ -89,14 +90,14 @@ export class TwitchIRCService {
 					res = this.dbStorage.commands.find((x) => x.name === command);
 				}
 
-				let toSend: string;
+				let toSend: string = "";
 				// Handle calling async responses
 				if (res && typeof res.response === "string") {
 					toSend = res.response;
 				} else if (res && typeof res.response === "function") {
 					toSend = await res.response(message, userState);
 				} else {
-					console.error("Command not found");
+					return console.error("Command not found");
 				}
 
 				// Send reaction or just send a message
@@ -133,8 +134,11 @@ export class TwitchIRCService {
 
 	/** Replace count variable in the  */
 	private async replaceVariables(msg: Command): Promise<string> {
+		if (typeof msg.response === "string") {
+			console.error("GOT WRONG RESPONSE");
+		}
 		return await Mustache.render(
-			msg.response,
+			typeof msg.response === "string" ? msg.response : "",
 			{
 				count: async () => {
 					return msg?.counter || 0;

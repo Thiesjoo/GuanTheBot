@@ -13,7 +13,7 @@ export class DBStorageService {
 
 	commands: Command[] = [];
 
-	constructor(private db?: DatabaseService) {}
+	constructor(private db: DatabaseService) {}
 
 	async updateAll() {
 		this.triggers = await this.db.getAllTriggers();

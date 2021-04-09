@@ -15,9 +15,9 @@ interface Collections {
 @AutoInjectable()
 @Singleton()
 export class DatabaseService {
-	private connection: Db;
+	private connection: Db | null = null;
 
-	constructor(private config?: ConfigService) {}
+	constructor(private config: ConfigService) {}
 
 	async initDb() {
 		this.connection = (
@@ -27,10 +27,14 @@ export class DatabaseService {
 		).db(this.config.mongoDB);
 	}
 
-	private getAll<T extends keyof Collections>(
+	private async getAll<T extends keyof Collections>(
 		collection: T
 	): Promise<Collections[T]> {
-		return this.connection.collection(collection).find({}).toArray();
+		const res: Collections[T] | undefined = await this.connection
+			?.collection(collection)
+			.find({})
+			.toArray();
+		return res || [];
 	}
 
 	async getAllTriggers(): Promise<Trigger[]> {
@@ -54,7 +58,7 @@ export class DatabaseService {
 	}
 
 	async increaseUser(username: string) {
-		return this.connection.collection("users").updateOne(
+		return this.connection?.collection("users").updateOne(
 			{
 				name: username,
 			},

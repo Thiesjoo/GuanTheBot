@@ -64,7 +64,7 @@ async function main() {
 process.stdin.resume(); //so the program will not close instantly
 
 function exitHandler(
-	options: { cleanup: boolean; exit: boolean },
+	options: { cleanup?: boolean; exit?: boolean },
 	exitCode: number
 ) {
 	console.log(options, exitCode);

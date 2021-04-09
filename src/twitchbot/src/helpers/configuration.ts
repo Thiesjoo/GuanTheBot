@@ -3,19 +3,20 @@ import { Injectable } from "./tsyringe.reexport";
 @Injectable()
 export class ConfigService {
 	get tmiIdentity(): {
-		username?: string;
-		password?: string | (() => string | Promise<string>);
+		username: string;
+		password: string | (() => string | Promise<string>);
 	} {
 		return {
-			username: process.env.TMI_USER,
-			password: process.env.TMI_KEY,
+			username: process.env.TMI_USER || "",
+			password: process.env.TMI_KEY || "",
 		};
 	}
 
 	get mongoURL() {
 		return (
 			process.env.MONGO_URL ||
-			process.env.QOVERY_DATABASE_MY_MONGODB_CONNECTION_URI
+			process.env.QOVERY_DATABASE_MY_MONGODB_CONNECTION_URI ||
+			""
 		);
 	}
 
