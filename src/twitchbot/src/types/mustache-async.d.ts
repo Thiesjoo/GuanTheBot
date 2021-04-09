@@ -4,5 +4,5 @@ declare module "mustache-async" {
 		view: any,
 		partials?: any,
 		tags?: string[]
-	) => string;
+	) => Promise<string>;
 }

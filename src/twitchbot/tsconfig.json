@@ -1,21 +1,25 @@
 {
 	"compilerOptions": {
 		"module": "commonjs",
-		"declaration": true,
+		"target": "es2019",
+
+		"strict": true,
+		"strictPropertyInitialization": false,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
 		"removeComments": true,
+		//DO NOT TOUCH UNDER HERE
 		"emitDecoratorMetadata": true,
 		"experimentalDecorators": true,
-		"allowSyntheticDefaultImports": true,
-		"target": "es2017",
-		"sourceMap": true,
 		"outDir": "./dist",
 		"baseUrl": ".",
-		"rootDir": "./src",
-		"incremental": true,
 		"paths": {
 			"src/*": ["./src/*"],
 			"@services/*": ["./src/services/*"]
-		}
+		},
+		"typeRoots": ["./src/types/mustache-async.d.ts"]
 	},
-	"include": ["./src/**/*"]
+	"include": ["./src/**/*"],
+	"exclude": ["./src/main2.ts"] //Extra file
 }

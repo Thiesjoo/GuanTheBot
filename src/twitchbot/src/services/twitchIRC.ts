@@ -5,6 +5,7 @@ import { DBStorageService } from "./storageService";
 import ExtraCommands from "../commands/index.twitch";
 import { DatabaseService } from "./mongoDB";
 import { Command } from "src/helpers/types";
+// @ts-ignore
 import * as Mustache from "mustache-async";
 @AutoInjectable()
 export class TwitchIRCService {
@@ -127,8 +128,6 @@ export class TwitchIRCService {
 				}
 				return;
 			}
-
-			console.log(displayName, message, tempCommand);
 		});
 	}
 
