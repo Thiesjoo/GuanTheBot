@@ -26,8 +26,6 @@ export class DBStorageService {
 			listening: await this.db.getAllListeners(),
 			users: await this.db.getAllUsers(),
 		};
-
-		this.updateGeneral("commands", "nasd", { name: "asd" });
 	}
 
 	async updateGeneral<T extends keyof Collections>(
