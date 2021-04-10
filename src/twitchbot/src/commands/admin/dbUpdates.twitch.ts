@@ -40,7 +40,10 @@ const commands: Command[] = [
 		admin: true,
 		response: async () => {
 			const storage = container.resolve(DBStorageService);
-			storage.updateAll();
+			const twitch = container.resolve(TwitchIRCService);
+			storage.data.listening.forEach((x) => twitch.client.part(x.name));
+			await storage.updateAll();
+			storage.data.listening.forEach((x) => twitch.client.join(x.name));
 		},
 	},
 	{

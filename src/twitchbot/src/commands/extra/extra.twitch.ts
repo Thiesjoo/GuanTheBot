@@ -28,7 +28,7 @@ const commands: Command[] = [
 		response: async (message, userState) => {
 			const { fullArgs } = parseCommand(message, userState);
 
-			return fullArgs.replace(/o/g, " OMEGALUL ");
+			return fullArgs.replace(/o|O/g, " OMEGALUL ");
 		},
 	},
 	{

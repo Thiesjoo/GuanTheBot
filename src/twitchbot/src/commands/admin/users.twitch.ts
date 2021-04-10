@@ -49,7 +49,7 @@ const commands: Command[] = [
 			const storage = container.resolve(DBStorageService);
 			storage.data.users.sort((a, b) => b.counter - a.counter);
 			return storage.data.users.reduce((acc, val, i) => {
-				if (i > 2) return acc;
+				if (i > 4) return acc;
 				acc += `${acc.length === 0 ? "" : " | "}${val.name} zit op ${
 					val.counter || 0
 				}`;
