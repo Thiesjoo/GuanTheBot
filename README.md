@@ -1,13 +1,20 @@
 # twitchTestBot
 
-Deployed on HEROKU and Qovery
+Deployed on Qovery
+
+## TODO
+
+- Add events on trigger
+- Add currency (transfer to different users)
+- Add betting on where **anon** will be in a week
+- Add seperate docker-compose.yml for people who do not run with qovery
 
 ## ENV
 
 For the entire setup provide:
 `${LOCAL_WORKSPACE_FOLDER}` with the folder you are working in. Only required if you're not running in the devcontainer.
 
-For the app:
+For the twitchbot:
 
 ```
 TMI_KEY=tmioauth
@@ -20,22 +27,21 @@ WRA_KEY=the api key from wolframalpha
 
 ## Installation
 
-No installation is required, just make sure you run in the vscode devcontainer. Then run `npm run start` to start the bot
+Bot:
+
+```bash
+cd src/twitchbot
+npm i
+npm run start
+```
 
 ## Deployment
 
 To start the bot on a local server:
 
+- Have mongodb installed
 - Clone the repo
-- You have to provide the env file in the root of your directory for it to work.
-- You have to either have a preexisting dump of the database (in a folder called dump/) or you should be running in the devcontainer with an already filled mongodb
-
-### Devcontainer
-
-When in the devcontainer, just run `npm run start:docker`. This will first dump the database, then build a docker image with that dump incorporated. The it will start the local docker-compose file, which incorporated all of these aspects.
-
-### Local
-
-When outside the devcontainer, make sure you have a dump of the database you want to restore.
-Then run `docker build . -t thiesjoo/twitchtestingbot` to create the docker image.
-Finally run `docker-compose -p twitchtestingbot up` to get the containers up and running.
+- Provide the env file in the root of your directory
+- Run `qovery auth` to authenticate
+- Run `qovery application env list -c --dotenv >> .env` to export all the env variables
+- Run `qovery run`

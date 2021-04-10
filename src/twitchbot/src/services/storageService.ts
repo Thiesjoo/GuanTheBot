@@ -47,7 +47,7 @@ export class DBStorageService {
 		} else {
 			col.push(update);
 		}
-		await this.db.updateOne(
+		return await this.db.updateOne(
 			collection,
 			{
 				name: name,
@@ -55,8 +55,6 @@ export class DBStorageService {
 			{ $set: update },
 			true
 		);
-
-		return true;
 	}
 
 	/** Delete item from array */

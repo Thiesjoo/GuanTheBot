@@ -46,6 +46,11 @@ function updateFactory(type: keyof Collections, trigger = false) {
 			console.error("Message failed: ", message);
 			return "Update failed";
 		}
+
+		if (trigger && res.upsertedCount > 0) {
+			console.log("we got a new trigger");
+			//TODO: New trigger event
+		}
 	};
 }
 

@@ -137,6 +137,8 @@ export class TwitchIRCService {
 							// Update the user counter
 							await this.dbStorage.increaseUser(username, 1);
 
+							//TODO: new user typo event. (Should add event to DB and send message to webserver)
+
 							this.sendReaction(
 								displayName,
 								this.getRandomReaction().response,
