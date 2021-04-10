@@ -72,7 +72,9 @@ export class DBStorageService {
 		}
 		return false;
 	}
+	// TODO: Refactor this to general functions
 
+	/** Increase count of 1 users */
 	async increaseUser(username: string, count: number) {
 		let res = this.data.users.find((x) => x.name === username);
 		if (res) {

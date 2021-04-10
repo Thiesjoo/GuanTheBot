@@ -7,7 +7,7 @@ Deployed on Qovery
 - Add events on trigger
 - Add currency (transfer to different users)
 - Add betting on where **anon** will be in a week
-- Add seperate docker-compose.yml for people who do not run with qovery
+- Add seperate docker-compose.yml for people who do not run with qovery (Wait for qovery to support dockercompose)
 
 ## ENV
 
