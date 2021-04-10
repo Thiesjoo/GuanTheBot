@@ -3,9 +3,7 @@ import { AutoInjectable } from "@helpers/tsyringe.reexport";
 import { Client } from "tmi.js";
 import { DBStorageService } from "./storageService";
 import ExtraCommands from "../commands/index.twitch";
-import { DatabaseService } from "./mongoDB";
-import { Command } from "@helpers/types";
-// @ts-ignore
+import { Command } from "@mytypes/index";
 import * as Mustache from "mustache-async";
 @AutoInjectable()
 export class TwitchIRCService {
@@ -28,7 +26,7 @@ export class TwitchIRCService {
 					secure: true,
 				},
 				channels: [
-					...this.dbStorage.listening.map((x) => x.name),
+					...this.dbStorage.data.listening.map((x) => x.name),
 					this.config.tmiIdentity.username,
 					"guanthefirst",
 				],
@@ -69,7 +67,7 @@ export class TwitchIRCService {
 
 				if (
 					username !== this.config.adminUser &&
-					!this.dbStorage.users.find((x) => x.name === username)
+					!this.dbStorage.data.users.find((x) => x.name === username)
 				)
 					return;
 
@@ -99,7 +97,7 @@ export class TwitchIRCService {
 
 					//Default commands
 					if (!res) {
-						res = this.dbStorage.commands.find((x) => x.name === command);
+						res = this.dbStorage.data.commands.find((x) => x.name === command);
 					}
 
 					let toSend: string = "";
@@ -112,7 +110,7 @@ export class TwitchIRCService {
 						return console.error("Command not found");
 					}
 
-					let foundChannel = this.dbStorage.listening.find(
+					let foundChannel = this.dbStorage.data.listening.find(
 						(x) => x.name === channel.substr(1)
 					);
 					if (foundChannel && foundChannel.lurk !== undefined) {
@@ -125,27 +123,26 @@ export class TwitchIRCService {
 					} else {
 						this.sendMessage(toSend, channel);
 					}
-					//@ts-ignore Res is always defined
 					this.dbStorage.increaseCommandCounter(res.name, 1);
 
 					return;
 				} else {
-					const triggerFound = this.dbStorage.triggers.find((x) =>
+					const triggerFound = this.dbStorage.data.triggers.find((x) =>
 						message.includes(x.name)
 					);
 					if (triggerFound) {
 						if (triggerFound.response) {
 							this.sendReaction(displayName, triggerFound.response, channel);
 						} else {
+							// Update the user counter
+							await this.dbStorage.increaseUser(username, 1);
+
 							this.sendReaction(
 								displayName,
 								this.getRandomReaction().response,
 								channel
 							);
 						}
-
-						// Update the user counter
-						await this.dbStorage.increaseUser(username, 1);
 					}
 					return;
 				}
@@ -194,8 +191,8 @@ export class TwitchIRCService {
 	}
 
 	private getRandomReaction() {
-		return this.dbStorage.reactions[
-			Math.floor(Math.random() * this.dbStorage.reactions.length)
+		return this.dbStorage.data.reactions[
+			Math.floor(Math.random() * this.dbStorage.data.reactions.length)
 		];
 	}
 }

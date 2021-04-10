@@ -1,6 +1,13 @@
 import { ConfigService } from "@helpers/configuration";
 import { AutoInjectable, Singleton } from "@helpers/tsyringe.reexport";
-import { User, Command, Listening, Reaction, Trigger } from "@helpers/types";
+import {
+	User,
+	Command,
+	Listening,
+	Reaction,
+	Trigger,
+	Base,
+} from "@mytypes/types";
 import { Db, FilterQuery, MongoClient, UpdateQuery } from "mongodb";
 
 export interface Collections {
@@ -65,7 +72,8 @@ export class DatabaseService {
 
 	async updateOne<T extends keyof Collections>(
 		collection: T,
-		filter: FilterQuery<Collections[T]>,
+		// FIXME: | Base is a workaround because typing doesnt work with generics?
+		filter: FilterQuery<Collections[T]> | Base,
 		update: UpdateQuery<Collections[T]>,
 		upsert = false
 	) {
@@ -76,8 +84,10 @@ export class DatabaseService {
 
 	async deleteOne<T extends keyof Collections>(
 		collection: T,
-		doc: Collections[T]
-	): Promise<any> {
-		return await this.connection?.collection(collection).deleteOne(doc);
+		// FIXME: | Base is a workaround because typing doesnt work with generics?
+		doc: FilterQuery<Collections[T]> | Base
+	): Promise<void> {
+		await this.connection?.collection(collection).deleteOne(doc);
+		return;
 	}
 }

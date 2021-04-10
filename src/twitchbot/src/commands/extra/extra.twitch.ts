@@ -1,5 +1,5 @@
 import { ConfigService } from "@helpers/configuration";
-import { Command } from "@helpers/types";
+import { Command } from "@mytypes/types";
 import axios from "axios";
 import { container } from "tsyringe";
 import { parseCommand } from "../parseCommands";

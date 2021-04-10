@@ -12,10 +12,11 @@
 		"outDir": "dist",
 		"baseUrl": "./",
 		"paths": {
-			"@helpers/*": ["./src/helpers/*"],
-			"@services/*": ["./src/services/*"]
-		},
-		"typeRoots": ["./src/types/mustache-async.d.ts"]
+			"@helpers/*": ["src/helpers/*"],
+			"@services/*": ["src/services/*"],
+			"@mytypes/*": ["src/@types/*"],
+			"*": ["src/@types/*"]
+		}
 	},
 	"include": ["./src/**/*"],
 	"exclude": ["./src/main2.ts"]

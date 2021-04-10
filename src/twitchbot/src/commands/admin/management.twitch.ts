@@ -1,4 +1,4 @@
-import { Command } from "@helpers/types";
+import { Command } from "@mytypes/types";
 import { Collections } from "@services/mongoDB";
 import { DBStorageService } from "@services/storageService";
 import { TwitchIRCService } from "@services/twitchIRC";
@@ -8,15 +8,15 @@ import { parseCommand } from "../parseCommands";
 
 const commands: Command[] = [
 	{
-		name: ["addreaction", "editreaction"],
+		name: "addreaction",
 		response: updateFactory("reactions"),
 	},
 	{
-		name: ["addcmd", "editcmd"],
+		name: "addcmd",
 		response: updateFactory("commands"),
 	},
 	{
-		name: ["addtrigger", "edittrigger"],
+		name: "addtrigger",
 		response: updateFactory("triggers", true),
 	},
 	{

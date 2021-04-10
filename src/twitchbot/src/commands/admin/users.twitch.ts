@@ -1,4 +1,4 @@
-import { Command } from "@helpers/types";
+import { Command } from "@mytypes/types";
 import { DBStorageService } from "@services/storageService";
 import { container } from "tsyringe";
 import { parseCommand } from "../parseCommands";
@@ -30,10 +30,10 @@ const commands: Command[] = [
 			const storage = container.resolve(DBStorageService);
 
 			if (taggedUsername === "triggers") {
-				return `Er zijn nu al ${storage.triggers.length} triggers in de database`;
+				return `Er zijn nu al ${storage.data.triggers.length} triggers in de database`;
 			}
 
-			let user = storage.users.find(
+			let user = storage.data.users.find(
 				(x) => x.name === taggedUsername.toLowerCase()
 			);
 			if (!user) {
@@ -47,8 +47,8 @@ const commands: Command[] = [
 		reaction: false,
 		response: () => {
 			const storage = container.resolve(DBStorageService);
-			storage.users.sort((a, b) => b.counter - a.counter);
-			return storage.users.reduce((acc, val, i) => {
+			storage.data.users.sort((a, b) => b.counter - a.counter);
+			return storage.data.users.reduce((acc, val, i) => {
 				if (i > 2) return acc;
 				acc += `${acc.length === 0 ? "" : " | "}${val.name} zit op ${
 					val.counter || 0

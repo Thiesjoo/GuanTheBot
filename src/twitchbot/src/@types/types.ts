@@ -1,10 +1,12 @@
-import { ChatUserstate, Userstate } from "tmi.js";
+import { ChatUserstate } from "tmi.js";
 
-export type Base = { name: string; response: string };
+export type Base = { name: string };
 
-export type Trigger = Base;
+type response = { response: string };
+
+export type Trigger = Base & response;
 export type Command = {
-	name: string | string[];
+	name: string;
 	counter?: number;
 	admin?: boolean;
 	reaction?: boolean;
@@ -17,5 +19,5 @@ export type Command = {
 		| null;
 };
 export type User = { name: string; counter: number };
-export type Reaction = Base;
+export type Reaction = Base & response;
 export type Listening = { name: string; lurk: boolean };

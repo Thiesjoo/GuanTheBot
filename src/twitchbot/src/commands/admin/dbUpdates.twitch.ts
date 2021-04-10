@@ -1,4 +1,4 @@
-import { Command } from "@helpers/types";
+import { Command } from "@mytypes/types";
 import { DBStorageService } from "@services/storageService";
 import { TwitchIRCService } from "@services/twitchIRC";
 import { ChatUserstate } from "tmi.js";
@@ -12,7 +12,7 @@ const commands: Command[] = [
 		response: async (message, userState) => {
 			const { firstArg } = parseCommand(message, userState);
 			const storage = container.resolve(DBStorageService);
-			let res = storage.commands.find((x) => x.name === firstArg);
+			let res = storage.data.commands.find((x) => x.name === firstArg);
 			if (!res) {
 				return "Command with that name was not found";
 			}
@@ -27,6 +27,7 @@ const commands: Command[] = [
 			const storage = container.resolve(DBStorageService);
 			let res = storage.updateGeneral("commands", firstArg || "", {
 				counter: +args,
+				name: firstArg || "",
 			});
 			if (!res) {
 				return "Command with that name was not found";
@@ -77,6 +78,7 @@ async function listenGeneric(
 		remove
 			? storage.deleteGeneral("listening", taggedUsername)
 			: storage.updateGeneral("listening", taggedUsername, {
+					name: taggedUsername,
 					lurk: args === "true" ? true : false,
 			  }),
 		//Wrapping in promise to avoid ts errors
