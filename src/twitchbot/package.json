@@ -2,7 +2,7 @@
 	"name": "twitchbot",
 	"private": "true",
 	"version": "1.0.0",
-	"description": "",
+	"description": "This is a bot to annoy people in twitchchat",
 	"main": "src/index.js",
 	"scripts": {
 		"start": "ts-node-dev --rs --respawn -P tsconfig.json -r tsconfig-paths/register src/main.ts",
