@@ -36,7 +36,7 @@ const commands: Command[] = [
 function updateFactory(type: keyof Collections, trigger = false) {
 	return async (message: string, userState: ChatUserstate) => {
 		const { firstArg, args } = parseCommand(message, userState);
-		if (!firstArg || !args) return "pls provide correct args";
+		if (!firstArg || (!trigger && !args)) return "pls provide correct args";
 		const storage = container.resolve(DBStorageService);
 		let res = await storage.updateGeneral(type, firstArg, {
 			name: firstArg,
@@ -51,6 +51,7 @@ function updateFactory(type: keyof Collections, trigger = false) {
 			console.log("we got a new trigger");
 			//TODO: New trigger event
 		}
+		return "Added trigger. ";
 	};
 }
 
