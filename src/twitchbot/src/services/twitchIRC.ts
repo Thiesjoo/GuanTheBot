@@ -183,7 +183,17 @@ export class TwitchIRCService {
 			(x) => x.name === channel.substr(1),
 		);
 		if (foundChannel && foundChannel.lurk !== undefined) {
-			if (foundChannel.lurk) return;
+			if (foundChannel.lurk) {
+				console.log(
+					'Sending message: ',
+					`#${channel}:`,
+					msg,
+					'(AT TIME: ',
+					Date.now(),
+					')',
+				);
+				return;
+			}
 		}
 
 		if (typeof msg !== 'string') {
