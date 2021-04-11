@@ -1,8 +1,8 @@
-declare module "mustache-async" {
+declare module 'mustache-async' {
 	export const render: (
 		template: string,
 		view: any,
 		partials?: any,
-		tags?: string[]
+		tags?: string[],
 	) => Promise<string>;
 }

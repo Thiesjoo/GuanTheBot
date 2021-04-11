@@ -1,5 +1,5 @@
-import { AutoInjectable } from "@helpers/tsyringe.reexport";
-import { DatabaseService } from "./mongoDB";
+import { AutoInjectable } from '@helpers/tsyringe.reexport';
+import { DatabaseService } from './mongoDB';
 
 @AutoInjectable()
 export class TwitchAPIService {

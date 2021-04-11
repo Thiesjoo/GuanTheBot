@@ -1,7 +1,7 @@
-import { AutoInjectable, Singleton } from "@helpers/tsyringe.reexport";
-import { Base } from "@mytypes/types";
-import { MatchKeysAndValues, UpdateQuery } from "mongodb";
-import { Collections, DatabaseService } from "./mongoDB";
+import { AutoInjectable, Singleton } from '@helpers/tsyringe.reexport';
+import { Base } from '@mytypes/types';
+import { MatchKeysAndValues, UpdateQuery } from 'mongodb';
+import { Collections, DatabaseService } from './mongoDB';
 
 @Singleton()
 @AutoInjectable()
@@ -32,7 +32,7 @@ export class DBStorageService {
 		collection: T,
 		name: string,
 		// All property's are optional, expect base type
-		update: MatchKeysAndValues<Collections[T]> & Base
+		update: MatchKeysAndValues<Collections[T]> & Base,
 	) {
 		const col: Base[] = this.data[collection];
 
@@ -51,14 +51,14 @@ export class DBStorageService {
 				name: name,
 			},
 			{ $set: update },
-			true
+			true,
 		);
 	}
 
 	/** Delete item from array */
 	async deleteGeneral<T extends keyof Collections>(
 		collection: T,
-		name: string
+		name: string,
 	) {
 		const col: Base[] = this.data[collection];
 
@@ -80,7 +80,7 @@ export class DBStorageService {
 		if (res) {
 			res.counter += count;
 			await this.db.updateOne(
-				"users",
+				'users',
 				{
 					name: username,
 				},
@@ -88,7 +88,7 @@ export class DBStorageService {
 					$inc: {
 						counter: count,
 					},
-				}
+				},
 			);
 			return true;
 		}
@@ -97,7 +97,7 @@ export class DBStorageService {
 
 	/** Increase the counter of a specific command */
 	async increaseCommandCounter(name: string | string[], count: number) {
-		if (typeof name !== "string") {
+		if (typeof name !== 'string') {
 			// When type is string[] the command is a local command, and count should not be stored
 			return true;
 		}
@@ -107,7 +107,7 @@ export class DBStorageService {
 			if (!res.counter) res.counter = 0;
 			res.counter += count;
 			await this.db.updateOne(
-				"commands",
+				'commands',
 				{
 					name,
 				},
@@ -115,7 +115,7 @@ export class DBStorageService {
 					$inc: {
 						counter: count,
 					},
-				}
+				},
 			);
 			return true;
 		}

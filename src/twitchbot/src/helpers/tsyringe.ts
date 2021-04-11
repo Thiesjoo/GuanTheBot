@@ -1,13 +1,13 @@
-import { DatabaseService } from "@services/mongoDB";
-import { TwitchIRCService } from "@services/twitchIRC";
+import { DatabaseService } from '@services/mongoDB';
+import { TwitchIRCService } from '@services/twitchIRC';
 import {
 	autoInjectable,
 	container,
 	inject,
 	injectable,
 	singleton,
-} from "tsyringe";
-import { ConfigService } from "./configuration";
+} from 'tsyringe';
+import { ConfigService } from './configuration';
 
 export enum injectionKeys {}
 

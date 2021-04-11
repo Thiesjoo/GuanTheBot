@@ -1,4 +1,4 @@
-import { Injectable } from "./tsyringe.reexport";
+import { Injectable } from './tsyringe.reexport';
 
 @Injectable()
 export class ConfigService {
@@ -7,8 +7,8 @@ export class ConfigService {
 		password: string | (() => string | Promise<string>);
 	} {
 		return {
-			username: process.env.TMI_USER || "",
-			password: process.env.TMI_KEY || "",
+			username: process.env.TMI_USER || '',
+			password: process.env.TMI_KEY || '',
 		};
 	}
 
@@ -16,23 +16,23 @@ export class ConfigService {
 		return (
 			process.env.MONGO_URL ||
 			process.env.QOVERY_DATABASE_MY_MONGODB_CONNECTION_URI ||
-			""
+			''
 		);
 	}
 
 	get mongoDB() {
-		return process.env.MONGO_DB || "twitchbot";
+		return process.env.MONGO_DB || 'twitchbot';
 	}
 
 	get version() {
-		return process.env.QOVERY_APPLICATION_COMMIT_SHA_SHORT || "000000";
+		return process.env.QOVERY_APPLICATION_COMMIT_SHA_SHORT || '000000';
 	}
 
 	get adminUser() {
-		return process.env.ADMIN_USER || "guanthethird";
+		return process.env.ADMIN_USER || 'guanthethird';
 	}
 
 	get wraKey() {
-		return process.env.WRA_KEY || "";
+		return process.env.WRA_KEY || '';
 	}
 }

@@ -1,4 +1,4 @@
-import { ChatUserstate } from "tmi.js";
+import { ChatUserstate } from 'tmi.js';
 
 export type Base = { name: string };
 
@@ -13,7 +13,7 @@ export type Command = {
 	response:
 		| ((
 				message: string,
-				userState: ChatUserstate
+				userState: ChatUserstate,
 		  ) => void | string | Promise<string | void>)
 		| string
 		| null;

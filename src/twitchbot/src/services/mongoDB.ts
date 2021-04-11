@@ -1,5 +1,5 @@
-import { ConfigService } from "@helpers/configuration";
-import { AutoInjectable, Singleton } from "@helpers/tsyringe.reexport";
+import { ConfigService } from '@helpers/configuration';
+import { AutoInjectable, Singleton } from '@helpers/tsyringe.reexport';
 import {
 	User,
 	Command,
@@ -7,8 +7,8 @@ import {
 	Reaction,
 	Trigger,
 	Base,
-} from "@mytypes/types";
-import { Db, FilterQuery, MongoClient, UpdateQuery } from "mongodb";
+} from '@mytypes/types';
+import { Db, FilterQuery, MongoClient, UpdateQuery } from 'mongodb';
 
 export interface Collections {
 	triggers: Trigger;
@@ -34,7 +34,7 @@ export class DatabaseService {
 	}
 
 	private async getAll<T extends keyof Collections>(
-		collection: T
+		collection: T,
 	): Promise<Collections[T][]> {
 		const res: Collections[T][] | undefined = await this.connection
 			?.collection(collection)
@@ -44,28 +44,28 @@ export class DatabaseService {
 	}
 
 	async getAllTriggers(): Promise<Trigger[]> {
-		return this.getAll("triggers");
+		return this.getAll('triggers');
 	}
 
 	async getAllCommands(): Promise<Command[]> {
-		return this.getAll("commands");
+		return this.getAll('commands');
 	}
 
 	async getAllUsers(): Promise<User[]> {
-		return this.getAll("users");
+		return this.getAll('users');
 	}
 
 	async getAllReactions(): Promise<Reaction[]> {
-		return this.getAll("reactions");
+		return this.getAll('reactions');
 	}
 
 	async getAllListeners(): Promise<Listening[]> {
-		return this.getAll("listening");
+		return this.getAll('listening');
 	}
 
 	async insertMany<T extends keyof Collections>(
 		collection: T,
-		docs: Collections[T][]
+		docs: Collections[T][],
 	): Promise<any> {
 		return await this.connection?.collection(collection).insertMany(docs);
 	}
@@ -75,7 +75,7 @@ export class DatabaseService {
 		// FIXME: | Base is a workaround because typing doesnt work with generics?
 		filter: FilterQuery<Collections[T]> | Base,
 		update: UpdateQuery<Collections[T]>,
-		upsert = false
+		upsert = false,
 	) {
 		return await this.connection
 			?.collection(collection)
@@ -85,7 +85,7 @@ export class DatabaseService {
 	async deleteOne<T extends keyof Collections>(
 		collection: T,
 		// FIXME: | Base is a workaround because typing doesnt work with generics?
-		doc: FilterQuery<Collections[T]> | Base
+		doc: FilterQuery<Collections[T]> | Base,
 	): Promise<void> {
 		await this.connection?.collection(collection).deleteOne(doc);
 		return;
