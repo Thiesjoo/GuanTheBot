@@ -1,12 +1,15 @@
 import { ChatUserstate } from 'tmi.js';
 
-export type Base = { name: string };
-
+/** Extra type for ease of use */
 type response = { response: string };
 
+export type Base = { name: string };
+
+/** Triggers in chat */
 export type Trigger = Base & response;
-export type Command = {
-	name: string;
+
+/** Command in chat. (Can have a function as response, for custom commands) */
+export type Command = Base & {
 	counter?: number;
 	admin?: boolean;
 	reaction?: boolean;
@@ -18,6 +21,12 @@ export type Command = {
 		| string
 		| null;
 };
-export type User = { name: string; counter: number };
+
+/** Trusted user of application */
+export type TrustedUser = Base & { counter: number };
+
+/** Reaction to TYPO */
 export type Reaction = Base & response;
-export type Listening = { name: string; lurk: boolean };
+
+/** Channel to listen to */
+export type Listening = Base & { lurk?: boolean };

@@ -51,7 +51,7 @@ function updateFactory(type: keyof Collections, trigger = false) {
 			console.log('we got a new trigger');
 			//TODO: New trigger event
 		}
-		return 'Added trigger. ';
+		return `Added ${type}.`;
 	};
 }
 

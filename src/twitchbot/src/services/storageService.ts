@@ -1,8 +1,23 @@
 import { AutoInjectable, Singleton } from '@helpers/tsyringe.reexport';
 import { Base } from '@mytypes/types';
-import { MatchKeysAndValues, UpdateQuery } from 'mongodb';
+import { MatchKeysAndValues, UpdateQuery, UpdateWriteOpResult } from 'mongodb';
 import { Collections, DatabaseService } from './mongoDB';
 
+type UpdateGeneralFunctionType =
+	| (<T extends keyof Collections>(
+			collection: T,
+			name: string,
+			// All property's are optional, expect base type
+			update: Collections[T],
+			upsert: true,
+	  ) => Promise<{ upsertedCount: number }>)
+	| (<T extends keyof Collections>(
+			collection: T,
+			name: string,
+			// All property's are optional, expect base type
+			update: MatchKeysAndValues<Collections[T]>,
+			upsert: false,
+	  ) => Promise<{ upsertedCount: number }>);
 @Singleton()
 @AutoInjectable()
 export class DBStorageService {
@@ -32,27 +47,39 @@ export class DBStorageService {
 		collection: T,
 		name: string,
 		// All property's are optional, expect base type
-		update: MatchKeysAndValues<Collections[T]> & Base,
+		update: Collections[T] | MatchKeysAndValues<Collections[T]>,
+		upsert = true,
 	) {
-		const col: Base[] = this.data[collection];
+		const col: any[] = this.data[collection];
 
-		let res = col.findIndex((x: Base) => x.name === name);
-		if (res > -1) {
-			col.splice(res, 1, {
-				...col[res],
-				...update,
-			});
-		} else {
-			col.push(update);
-		}
-		return await this.db.updateOne(
+		// let res = col.findIndex((x: Base) => x.name === name);
+		// if (res > -1) {
+		// 	col.splice(res, 1, {
+		// 		...col[res],
+		// 		...update,
+		// 	});
+		// } else if (upsert === true) {
+		// 	col.push(update);
+		// }
+		let result = await this.db.updateOne(
 			collection,
 			{
 				name: name,
 			},
 			{ $set: update },
-			true,
+			upsert,
 		);
+		let newValue = result?.value;
+		console.log(result);
+
+		if (newValue) {
+			let res = col.findIndex((x: Base) => x.name === name);
+			if (res > -1) {
+				col.splice(res, 1, newValue);
+			} else {
+				col.push(newValue);
+			}
+		}
 	}
 
 	/** Delete item from array */
@@ -76,23 +103,30 @@ export class DBStorageService {
 
 	/** Increase count of 1 users */
 	async increaseUser(username: string, count: number) {
-		let res = this.data.users.find((x) => x.name === username);
-		if (res) {
-			res.counter += count;
-			await this.db.updateOne(
-				'users',
-				{
-					name: username,
-				},
-				{
-					$inc: {
-						counter: count,
-					},
-				},
-			);
-			return true;
-		}
-		return false;
+		let res = await this.updateGeneral('users', username, {
+			$inc: {
+				counter: count,
+			},
+		});
+
+		return !!res;
+		// let res = this.data.users.find((x) => x.name === username);
+		// if (res) {
+		// 	res.counter += count;
+		// 	await this.db.updateOne(
+		// 		'users',
+		// 		{
+		// 			name: username,
+		// 		},
+		// 		{
+		// 			$inc: {
+		// 				counter: count,
+		// 			},
+		// 		},
+		// 	);
+		// 	return true;
+		// }
+		// return false;
 	}
 
 	/** Increase the counter of a specific command */

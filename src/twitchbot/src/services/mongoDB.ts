@@ -1,19 +1,25 @@
 import { ConfigService } from '@helpers/configuration';
 import { AutoInjectable, Singleton } from '@helpers/tsyringe.reexport';
 import {
-	User,
+	TrustedUser,
 	Command,
 	Listening,
 	Reaction,
 	Trigger,
 	Base,
 } from '@mytypes/types';
-import { Db, FilterQuery, MongoClient, UpdateQuery } from 'mongodb';
+import {
+	Db,
+	FilterQuery,
+	MongoClient,
+	UpdateQuery,
+	UpdateWriteOpResult,
+} from 'mongodb';
 
 export interface Collections {
 	triggers: Trigger;
 	commands: Command;
-	users: User;
+	users: TrustedUser;
 	reactions: Reaction;
 	listening: Listening;
 }
@@ -21,7 +27,7 @@ export interface Collections {
 @AutoInjectable()
 @Singleton()
 export class DatabaseService {
-	private connection: Db | null = null;
+	private connection?: Db;
 
 	constructor(private config: ConfigService) {}
 
@@ -51,7 +57,7 @@ export class DatabaseService {
 		return this.getAll('commands');
 	}
 
-	async getAllUsers(): Promise<User[]> {
+	async getAllUsers(): Promise<TrustedUser[]> {
 		return this.getAll('users');
 	}
 
@@ -63,12 +69,12 @@ export class DatabaseService {
 		return this.getAll('listening');
 	}
 
-	async insertMany<T extends keyof Collections>(
-		collection: T,
-		docs: Collections[T][],
-	): Promise<any> {
-		return await this.connection?.collection(collection).insertMany(docs);
-	}
+	// async insertMany<T extends keyof Collections>(
+	// 	collection: T,
+	// 	docs: Collections[T][],
+	// ): Promise<any> {
+	// 	return await this.connection?.collection(collection).insertMany(docs);
+	// }
 
 	async updateOne<T extends keyof Collections>(
 		collection: T,
@@ -76,7 +82,7 @@ export class DatabaseService {
 		filter: FilterQuery<Collections[T]> | Base,
 		update: UpdateQuery<Collections[T]>,
 		upsert = false,
-	) {
+	): Promise<undefined | { upsertedCount: number }> {
 		return await this.connection
 			?.collection(collection)
 			.updateOne(filter, update, { upsert });
@@ -91,3 +97,5 @@ export class DatabaseService {
 		return;
 	}
 }
+
+export default DatabaseService;
