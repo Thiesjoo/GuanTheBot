@@ -11,9 +11,12 @@ import {
 import {
 	Db,
 	FilterQuery,
+	FindAndModifyWriteOpResultObject,
+	InsertOneWriteOpResult,
 	MongoClient,
 	UpdateQuery,
 	UpdateWriteOpResult,
+	WithId,
 } from 'mongodb';
 
 export interface Collections {
@@ -69,29 +72,30 @@ export class DatabaseService {
 		return this.getAll('listening');
 	}
 
-	// async insertMany<T extends keyof Collections>(
-	// 	collection: T,
-	// 	docs: Collections[T][],
-	// ): Promise<any> {
-	// 	return await this.connection?.collection(collection).insertMany(docs);
-	// }
+	async count(collection: keyof Collections, filter: Base) {
+		return await this.connection?.collection(collection).count(filter);
+	}
+
+	async insertOne<T extends keyof Collections>(
+		collection: T,
+		docs: Collections[T],
+	): Promise<InsertOneWriteOpResult<WithId<Collections[T]>> | undefined> {
+		return await this.connection?.collection(collection).insertOne(docs);
+	}
 
 	async updateOne<T extends keyof Collections>(
 		collection: T,
-		// FIXME: | Base is a workaround because typing doesnt work with generics?
 		filter: FilterQuery<Collections[T]> | Base,
 		update: UpdateQuery<Collections[T]>,
-		upsert = false,
-	): Promise<undefined | { upsertedCount: number }> {
+	): Promise<undefined | FindAndModifyWriteOpResultObject<Collections[T]>> {
 		return await this.connection
 			?.collection(collection)
-			.updateOne(filter, update, { upsert });
+			.findOneAndUpdate(filter, update, { returnOriginal: false });
 	}
 
 	async deleteOne<T extends keyof Collections>(
 		collection: T,
-		// FIXME: | Base is a workaround because typing doesnt work with generics?
-		doc: FilterQuery<Collections[T]> | Base,
+		doc: Base,
 	): Promise<void> {
 		await this.connection?.collection(collection).deleteOne(doc);
 		return;

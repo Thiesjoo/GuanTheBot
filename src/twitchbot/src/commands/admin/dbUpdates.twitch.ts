@@ -26,8 +26,8 @@ const commands: Command[] = [
 			const { firstArg, args } = parseCommand(message, userState);
 			const storage = container.resolve(DBStorageService);
 			let res = storage.updateGeneral('commands', firstArg || '', {
-				counter: +args,
 				name: firstArg || '',
+				counter: +args,
 			});
 			if (!res) {
 				return 'Command with that name was not found';

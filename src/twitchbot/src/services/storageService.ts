@@ -43,43 +43,68 @@ export class DBStorageService {
 		};
 	}
 
+	/** Update a document, or add a new one if the document does not exist yet */
+	private async upsertGeneral<T extends keyof Collections>(
+		collection: T,
+		update: Collections[T] & Base,
+		upsert = true,
+	): Promise<Collections[T] | false> {
+		let count = this.data[collection].findIndex(
+			(x: Base) => x.name === update.name,
+		);
+		if (count > -1) {
+			let updateRes = await this.db.updateOne(
+				collection,
+				{
+					name: update.name,
+				},
+				{
+					$set: {
+						...update,
+					},
+				},
+			);
+
+			if (updateRes === undefined || (updateRes && !updateRes.value)) {
+				console.error(
+					'DESYNC BETWEEN DATABASE AND LOCAL COLLECTIONS',
+					JSON.stringify(this),
+				);
+				return false;
+			}
+
+			//@ts-ignore
+			this.data[collection].splice(count, 1, updateRes.value);
+
+			//@ts-ignore FIXME: ts stoopid?
+			return updateRes.value;
+		} else if (upsert) {
+			let result = await this.db.insertOne(collection, update);
+			if (!result) return false;
+
+			//@ts-ignore
+			this.data[collection].push(update);
+
+			return update;
+		}
+		return false;
+	}
+
 	async updateGeneral<T extends keyof Collections>(
 		collection: T,
 		name: string,
-		// All property's are optional, expect base type
-		update: Collections[T] | MatchKeysAndValues<Collections[T]>,
+		update: Partial<Collections[T]>,
 		upsert = true,
 	) {
-		const col: any[] = this.data[collection];
-
-		// let res = col.findIndex((x: Base) => x.name === name);
-		// if (res > -1) {
-		// 	col.splice(res, 1, {
-		// 		...col[res],
-		// 		...update,
-		// 	});
-		// } else if (upsert === true) {
-		// 	col.push(update);
-		// }
-		let result = await this.db.updateOne(
+		return this.upsertGeneral(
 			collection,
+			//@ts-ignore
 			{
-				name: name,
+				...update,
+				name,
 			},
-			{ $set: update },
 			upsert,
 		);
-		let newValue = result?.value;
-		console.log(result);
-
-		if (newValue) {
-			let res = col.findIndex((x: Base) => x.name === name);
-			if (res > -1) {
-				col.splice(res, 1, newValue);
-			} else {
-				col.push(newValue);
-			}
-		}
 	}
 
 	/** Delete item from array */
@@ -102,52 +127,35 @@ export class DBStorageService {
 	// TODO: Refactor this to general functions
 
 	/** Increase count of 1 users */
-	async increaseUser(username: string, count: number) {
-		let res = await this.updateGeneral('users', username, {
-			$inc: {
-				counter: count,
-			},
-		});
-
-		return !!res;
-		// let res = this.data.users.find((x) => x.name === username);
-		// if (res) {
-		// 	res.counter += count;
-		// 	await this.db.updateOne(
-		// 		'users',
-		// 		{
-		// 			name: username,
-		// 		},
-		// 		{
-		// 			$inc: {
-		// 				counter: count,
-		// 			},
-		// 		},
-		// 	);
-		// 	return true;
-		// }
-		// return false;
+	async increaseUser(name: string, count: number) {
+		return this.increaseGeneral('users', name, count);
 	}
 
 	/** Increase the counter of a specific command */
-	async increaseCommandCounter(name: string | string[], count: number) {
-		if (typeof name !== 'string') {
-			// When type is string[] the command is a local command, and count should not be stored
-			return true;
-		}
+	async increaseCommandCounter(name: string, count: number) {
+		return this.increaseGeneral('commands', name, count);
+	}
 
-		let res = this.data.commands.find((x) => x.name === name);
-		if (res) {
+	private async increaseGeneral(
+		collection: 'users' | 'commands',
+		name: string,
+		amount: number,
+	) {
+		let resIndex = this.data[collection].findIndex(
+			(x: Base) => x.name === name,
+		);
+		if (resIndex > -1) {
+			let res = this.data[collection][resIndex];
 			if (!res.counter) res.counter = 0;
-			res.counter += count;
+			res.counter += amount;
 			await this.db.updateOne(
-				'commands',
+				collection,
 				{
 					name,
 				},
 				{
 					$inc: {
-						counter: count,
+						counter: amount,
 					},
 				},
 			);

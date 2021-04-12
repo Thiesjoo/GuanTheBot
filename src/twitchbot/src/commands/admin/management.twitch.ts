@@ -47,9 +47,9 @@ function updateFactory(type: keyof Collections, trigger = false) {
 			return 'Update failed';
 		}
 
-		if (trigger && res.upsertedCount > 0) {
+		if (trigger) {
 			console.log('we got a new trigger');
-			//TODO: New trigger event
+			//TODO: New trigger create/update event
 		}
 		return `Added ${type}.`;
 	};

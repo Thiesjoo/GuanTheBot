@@ -10,6 +10,8 @@ import { DatabaseService } from '../../src/services/mongoDB';
 export class MockDatabase implements PublicInterfaceOf<DatabaseService> {
 	initDb;
 
+	localCache: any = {};
+
 	async getAll(name: string) {
 		return [];
 	}
@@ -34,12 +36,42 @@ export class MockDatabase implements PublicInterfaceOf<DatabaseService> {
 		return this.getAll('listening');
 	}
 
-	async deleteOne() {
-		return;
+	async insertOne(collection, item) {
+		//MAKE SURE TO CLONE AND NOT COPY
+		this.localCache[collection] = [{ ...item }];
+		return true;
 	}
+
+	async deleteOne() {
+		return true;
+	}
+
+	//TODO: This is a very simple mock
 	async updateOne(col, fil, upd, upsert) {
+		let item = this.localCache[col].find((x) => x.name === fil.name);
+
+		if (!item) return undefined;
+		Object.entries(upd).forEach((updateQueryPart: [string, {}]) => {
+			switch (updateQueryPart[0]) {
+				case '$set': {
+					Object.entries(updateQueryPart[1]).forEach((y) => {
+						item[y[0]] = y[1];
+					});
+					break;
+				}
+				case '$inc': {
+					Object.entries(updateQueryPart[1]).forEach((y) => {
+						if (!item[y[0]]) item[y[0]] = 0;
+						item[y[0]] += y[1];
+					});
+					break;
+				}
+			}
+		});
+
 		return {
-			upsertedCount: upsert ? 1 : 0,
+			ok: true,
+			value: item,
 		};
 	}
 }

@@ -9,6 +9,7 @@
 		"start:discordbot": "cd src/discordbot && npm run start"
 	},
 	"dependencies": {
+		"@types/jest": "^26.0.22",
 		"cross-env": "^7.0.3"
 	},
 	"devDependencies": {

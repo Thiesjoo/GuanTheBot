@@ -7,6 +7,97 @@ import { DatabaseService } from '../../src/services/mongoDB';
 import { DBStorageService } from '../../src/services/storageService';
 import { MockDatabase } from './dbMock';
 
+describe('test dbmock', () => {
+	let dbMock: DatabaseService;
+	beforeAll(() => {
+		container.registerSingleton(DBStorageService);
+	});
+	beforeEach(() => {
+		container.clearInstances();
+
+		let mockedDatabase = (new MockDatabase() as unknown) as DatabaseService;
+		container.registerInstance(DatabaseService, mockedDatabase);
+		dbMock = container.resolve(DatabaseService);
+	});
+
+	it('should insert objects correcly', async () => {
+		expect.assertions(2);
+		const colName = 'triggers';
+		expect(dbMock.localCache[colName]).toBeFalsy();
+		await dbMock.insertOne(colName, {
+			name: 'asd',
+		});
+
+		expect(dbMock.localCache[colName].length).toBe(1);
+	});
+
+	it('should update objects correctly ($set)', async () => {
+		expect.assertions(4);
+
+		const colName = 'triggers';
+		const key = 'key';
+		const name = 'name';
+
+		await dbMock.insertOne(colName, {
+			name,
+			[key]: 'initial value',
+		});
+
+		expect(dbMock.localCache[colName].length).toBe(1);
+
+		const updateValue = 'updated value';
+		await dbMock.updateOne(
+			colName,
+			{
+				name,
+			},
+			{
+				$set: {
+					[key]: updateValue,
+				},
+			},
+		);
+
+		expect(dbMock.localCache[colName].length).toBe(1);
+		expect(dbMock.localCache[colName][0]).toBeTruthy();
+		expect(dbMock.localCache[colName][0][key]).toBe(updateValue);
+	});
+
+	it('should update objects correctly ($inc)', async () => {
+		expect.assertions(4);
+
+		const colName = 'triggers';
+		const key = 'key';
+		const name = 'name';
+
+		const initialValue = 1;
+
+		await dbMock.insertOne(colName, {
+			name,
+			[key]: initialValue,
+		});
+
+		expect(dbMock.localCache[colName].length).toBe(1);
+
+		const updateValue = 10;
+		await dbMock.updateOne(
+			colName,
+			{
+				name,
+			},
+			{
+				$inc: {
+					[key]: updateValue,
+				},
+			},
+		);
+
+		expect(dbMock.localCache[colName].length).toBe(1);
+		expect(dbMock.localCache[colName][0]).toBeTruthy();
+		expect(dbMock.localCache[colName][0][key]).toBe(updateValue + initialValue);
+	});
+});
+
 describe('test storageService', () => {
 	let service: DBStorageService;
 	let dbMock: DatabaseService;
@@ -47,30 +138,30 @@ describe('test storageService', () => {
 		});
 	});
 	it('should add a general item', async () => {
-		expect.assertions(4);
+		expect.assertions(5);
 
-		const updateSpy = jest.spyOn(dbMock, 'updateOne');
+		const updateSpy = jest.spyOn(dbMock, 'insertOne');
 
 		const collection = 'triggers';
 		const name = 'asd';
 		const obj = { lmao: 'asd' };
-
 		const res = await service.updateGeneral(collection, name, obj, true);
+
 		// New object in store
-		expect(service.data.triggers.length).toBe(1);
+		expect(service.data[collection].length).toBe(1);
+		expect(res).toBeTruthy();
 
 		// New object in database
 		expect(updateSpy).toHaveBeenCalled();
-		expect(updateSpy).toHaveBeenCalledWith(
-			collection,
-			{
-				name,
-			},
-			{ $set: obj },
-			true,
-		);
+		expect(updateSpy).toHaveBeenCalledWith(collection, {
+			name,
+			...obj,
+		});
 
-		expect(res.upsertedCount).toBe(1);
+		expect(res).toMatchObject({
+			name,
+			...obj,
+		});
 	});
 	it('should update a general item', async () => {
 		expect.assertions(6);
@@ -79,57 +170,28 @@ describe('test storageService', () => {
 
 		const collection = 'triggers';
 		const name = 'initial trigger';
-		const obj = { key: 'updated value' };
+		const objToBeUpdated = { key: 'updated value' };
 
-		service.data[collection] = [
-			{
-				name,
-				key: 'initial value',
-			},
-		];
+		const fullItem = {
+			name,
+			key: 'initial value',
+			test: 0,
+		};
 
+		//Initialization
+		await service.updateGeneral(collection, name, fullItem, true);
 		expect(service.data.triggers.length).toBe(1);
 
-		const res = await service.updateGeneral(collection, name, obj, false);
-		// Updated object in store
-		expect(service.data.triggers.length).toBe(1);
-		expect(service.data.triggers[0].key).toBe(obj.key);
-
-		// New Updated in database
-		expect(updateSpy).toHaveBeenCalled();
-		expect(updateSpy).toHaveBeenCalledWith(
-			collection,
-			{
-				name,
-			},
-			{ $set: obj },
-			false,
-		);
-
-		expect(res.upsertedCount).toBe(0);
-	});
-	it('should upsert a general item', async () => {
-		expect.assertions(6);
-
-		const updateSpy = jest.spyOn(dbMock, 'updateOne');
-
-		const collection = 'triggers';
-		const name = 'initial trigger';
-
-		expect(service.data.triggers.length).toBe(0);
-
+		// The real updating
 		const res = await service.updateGeneral(
 			collection,
 			name,
-			{
-				name,
-				key: 'initial value',
-			},
-			true,
+			objToBeUpdated,
+			false,
 		);
 		// Updated object in store
 		expect(service.data.triggers.length).toBe(1);
-		expect(service.data.triggers[0].key).toBe('initial value');
+		expect(service.data.triggers[0].key).toBe(objToBeUpdated.key);
 
 		// New Updated in database
 		expect(updateSpy).toHaveBeenCalled();
@@ -141,13 +203,46 @@ describe('test storageService', () => {
 			{
 				$set: {
 					name,
-					key: 'initial value',
+					...objToBeUpdated,
 				},
 			},
-			true,
 		);
 
-		expect(res.upsertedCount).toBe(1);
+		expect(res).toMatchObject({
+			...fullItem,
+			...objToBeUpdated,
+		});
+	});
+	it('should upsert a general item', async () => {
+		expect.assertions(5);
+
+		const updateSpy = jest.spyOn(dbMock, 'insertOne');
+
+		const collection = 'triggers';
+
+		const toBeUpserted = {
+			name: 'initial trigger',
+			key: 'initial value',
+		};
+		const name = toBeUpserted.name;
+
+		expect(service.data.triggers.length).toBe(0);
+
+		const res = await service.updateGeneral(
+			collection,
+			name,
+			toBeUpserted,
+			true,
+		);
+		// Updated object in store
+		expect(service.data.triggers.length).toBe(1);
+
+		// Values
+		expect(service.data.triggers[0]).toMatchObject(toBeUpserted);
+		expect(res).toMatchObject(toBeUpserted);
+
+		// New Updated in database
+		expect(updateSpy).toHaveBeenCalled();
 	});
 	it('should delete a general item', async () => {
 		expect.assertions(4);
@@ -155,14 +250,13 @@ describe('test storageService', () => {
 		const deleteSpy = jest.spyOn(dbMock, 'deleteOne');
 
 		const collection = 'triggers';
-		const name = 'name';
+		const toBeUpserted = {
+			name: 'initial trigger',
+			key: 'initial value',
+		};
+		const name = toBeUpserted.name;
 
-		service.data[collection] = [
-			{
-				name,
-				key: 'initial value',
-			},
-		];
+		service.data[collection] = [toBeUpserted];
 
 		expect(service.data.triggers.length).toBe(1);
 
@@ -181,22 +275,22 @@ describe('test storageService', () => {
 
 		const updateSpy = jest.spyOn(dbMock, 'updateOne');
 
-		const name = 'initial user';
+		const initialUser = {
+			name: 'initial user',
+			counter: 0,
+		};
+		const name = initialUser.name;
 
-		service.data.users = [
-			{
-				name,
-				counter: 0,
-			},
-		];
-
+		//Initialization
+		await service.updateGeneral('users', name, initialUser, true);
 		expect(service.data.users.length).toBe(1);
 
-		const res = await service.increaseUser(name, 1);
+		//Incrase
+		const res = await service.increaseUser(name, 10);
 		expect(res).toBe(true);
 		// New object in store
 		expect(service.data.users.length).toBe(1);
-		expect(service.data.users[0].counter).toBe(1);
+		expect(service.data.users[0].counter).toBe(10);
 
 		// New object in database
 		expect(updateSpy).toHaveBeenCalled();
@@ -207,7 +301,7 @@ describe('test storageService', () => {
 			},
 			{
 				$inc: {
-					counter: 1,
+					counter: 10,
 				},
 			},
 		);
@@ -228,22 +322,24 @@ describe('test storageService', () => {
 
 		const updateSpy = jest.spyOn(dbMock, 'updateOne');
 
-		const name = 'initial command';
+		const toBeUpserted = {
+			name: 'initial trigger',
+			counter: 0,
+		};
+		const name = toBeUpserted.name;
+		await service.updateGeneral('commands', name, toBeUpserted, true);
 
-		service.data.commands = [
-			{
-				name,
-				counter: 0,
-			},
-		];
+		service.data.commands = [toBeUpserted];
 
 		expect(service.data.commands.length).toBe(1);
 
-		const res = await service.increaseCommandCounter(name, 1);
+		const increaseAmount = 10;
+
+		const res = await service.increaseCommandCounter(name, increaseAmount);
 		expect(res).toBe(true);
 		// New object in store
 		expect(service.data.commands.length).toBe(1);
-		expect(service.data.commands[0].counter).toBe(1);
+		expect(service.data.commands[0].counter).toBe(increaseAmount);
 
 		// New object in database
 		expect(updateSpy).toHaveBeenCalled();
@@ -254,7 +350,7 @@ describe('test storageService', () => {
 			},
 			{
 				$inc: {
-					counter: 1,
+					counter: increaseAmount,
 				},
 			},
 		);
