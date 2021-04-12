@@ -3,7 +3,7 @@ import 'reflect-metadata';
 import { container } from 'tsyringe';
 import { registerIOCContainer } from './helpers/tsyringe';
 import { DatabaseService } from './services/mongoDB';
-import { DBStorageService } from './services/storageService';
+import { DatabaseStorageService } from './services/storageService';
 import { TwitchAPIService } from './services/twitchAPI';
 import { TwitchIRCService } from './services/twitchIRC';
 
@@ -41,7 +41,7 @@ async function main() {
 	await db.initDb();
 	console.log('DB initialized');
 
-	const storageService = container.resolve(DBStorageService);
+	const storageService = container.resolve(DatabaseStorageService);
 	await storageService.updateAll();
 	console.log('Got all data');
 

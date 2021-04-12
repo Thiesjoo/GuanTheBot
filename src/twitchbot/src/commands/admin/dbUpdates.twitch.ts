@@ -1,5 +1,5 @@
 import { Command } from '@mytypes/types';
-import { DBStorageService } from '@services/storageService';
+import { DatabaseStorageService } from '@services/storageService';
 import { TwitchIRCService } from '@services/twitchIRC';
 import { ChatUserstate } from 'tmi.js';
 import { container } from 'tsyringe';
@@ -11,7 +11,7 @@ const commands: Command[] = [
 		name: 'cmdcounter',
 		response: async (message, userState) => {
 			const { firstArg } = parseCommand(message, userState);
-			const storage = container.resolve(DBStorageService);
+			const storage = container.resolve(DatabaseStorageService);
 			let res = storage.data.commands.find((x) => x.name === firstArg);
 			if (!res) {
 				return 'Command with that name was not found';
@@ -24,7 +24,7 @@ const commands: Command[] = [
 		admin: true,
 		response: async (message, userState) => {
 			const { firstArg, args } = parseCommand(message, userState);
-			const storage = container.resolve(DBStorageService);
+			const storage = container.resolve(DatabaseStorageService);
 			let res = storage.updateGeneral('commands', firstArg || '', {
 				name: firstArg || '',
 				counter: +args,
@@ -39,7 +39,7 @@ const commands: Command[] = [
 		name: 'refresh',
 		admin: true,
 		response: async () => {
-			const storage = container.resolve(DBStorageService);
+			const storage = container.resolve(DatabaseStorageService);
 			const twitch = container.resolve(TwitchIRCService);
 			storage.data.listening.forEach((x) => twitch.client.part(x.name));
 			await storage.updateAll();
@@ -75,7 +75,7 @@ async function listenGeneric(
 	remove: boolean,
 ) {
 	const { taggedUsername, args } = parseCommand(message, userState);
-	const storage = container.resolve(DBStorageService);
+	const storage = container.resolve(DatabaseStorageService);
 	const twitchIRC = container.resolve(TwitchIRCService);
 	let promises = [
 		remove

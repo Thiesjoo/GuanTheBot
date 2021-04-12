@@ -5,11 +5,9 @@ import {
 	Reaction,
 	Listening,
 } from '../../src/@types/types';
-import { DatabaseService } from '../../src/services/mongoDB';
 
-export class MockDatabase implements PublicInterfaceOf<DatabaseService> {
-	initDb;
-
+export class MockDatabase {
+	initDb: any;
 	localCache: any = {};
 
 	async getAll(name: string) {
@@ -36,7 +34,7 @@ export class MockDatabase implements PublicInterfaceOf<DatabaseService> {
 		return this.getAll('listening');
 	}
 
-	async insertOne(collection, item) {
+	async insertOne(collection: string, item: any) {
 		//MAKE SURE TO CLONE AND NOT COPY
 		this.localCache[collection] = [{ ...item }];
 		return true;
@@ -47,11 +45,18 @@ export class MockDatabase implements PublicInterfaceOf<DatabaseService> {
 	}
 
 	//TODO: This is a very simple mock
-	async updateOne(col, fil, upd, upsert) {
-		let item = this.localCache[col].find((x) => x.name === fil.name);
+	async updateOne(
+		col: string,
+		fil: {
+			name: string;
+		},
+		upd: { $set?: any; $inc?: any },
+		upsert = true,
+	) {
+		let item = this.localCache[col].find((x: any) => x.name === fil.name);
 
 		if (!item) return undefined;
-		Object.entries(upd).forEach((updateQueryPart: [string, {}]) => {
+		Object.entries(upd).forEach((updateQueryPart) => {
 			switch (updateQueryPart[0]) {
 				case '$set': {
 					Object.entries(updateQueryPart[1]).forEach((y) => {

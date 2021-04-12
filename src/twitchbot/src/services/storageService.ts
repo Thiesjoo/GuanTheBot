@@ -20,7 +20,7 @@ type UpdateGeneralFunctionType =
 	  ) => Promise<{ upsertedCount: number }>);
 @Singleton()
 @AutoInjectable()
-export class DBStorageService {
+export class DatabaseStorageService {
 	data: {
 		[key in keyof Collections]: Collections[key][];
 	} = {
@@ -95,7 +95,7 @@ export class DBStorageService {
 		name: string,
 		update: Partial<Collections[T]>,
 		upsert = true,
-	) {
+	): Promise<Collections[T] | boolean> {
 		return this.upsertGeneral(
 			collection,
 			//@ts-ignore
@@ -124,7 +124,6 @@ export class DBStorageService {
 		}
 		return false;
 	}
-	// TODO: Refactor this to general functions
 
 	/** Increase count of 1 users */
 	async increaseUser(name: string, count: number) {

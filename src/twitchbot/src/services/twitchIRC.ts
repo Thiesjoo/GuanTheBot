@@ -1,7 +1,7 @@
 import { ConfigService } from '@helpers/configuration';
 import { AutoInjectable } from '@helpers/tsyringe.reexport';
 import { Client } from 'tmi.js';
-import { DBStorageService } from './storageService';
+import { DatabaseStorageService } from './storageService';
 import ExtraCommands from '../commands/index.twitch';
 import { Command } from '@mytypes/index';
 import * as Mustache from 'mustache-async';
@@ -13,7 +13,7 @@ export class TwitchIRCService {
 
 	constructor(
 		private config: ConfigService,
-		private dbStorage: DBStorageService,
+		private dbStorage: DatabaseStorageService,
 	) {}
 
 	/** Initialize twitch client */

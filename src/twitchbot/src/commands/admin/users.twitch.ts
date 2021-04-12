@@ -1,5 +1,5 @@
 import { Command } from '@mytypes/types';
-import { DBStorageService } from '@services/storageService';
+import { DatabaseStorageService } from '@services/storageService';
 import { container } from 'tsyringe';
 import { parseCommand } from '../parseCommands';
 
@@ -14,7 +14,7 @@ const commands: Command[] = [
 				console.error('No tagged username', message);
 				return;
 			}
-			const storage = container.resolve(DBStorageService);
+			const storage = container.resolve(DatabaseStorageService);
 			let res = await storage.increaseUser(taggedUsername, +args || 1);
 			if (!res) {
 				console.error('Message failed: ', taggedUsername);
@@ -27,7 +27,7 @@ const commands: Command[] = [
 		reaction: false,
 		response: async (message, userState) => {
 			const { taggedUsername } = parseCommand(message, userState);
-			const storage = container.resolve(DBStorageService);
+			const storage = container.resolve(DatabaseStorageService);
 
 			if (taggedUsername === 'triggers') {
 				return `Er zijn nu al ${storage.data.triggers.length} triggers in de database`;
@@ -46,7 +46,7 @@ const commands: Command[] = [
 		name: 'top',
 		reaction: false,
 		response: () => {
-			const storage = container.resolve(DBStorageService);
+			const storage = container.resolve(DatabaseStorageService);
 			storage.data.users.sort((a, b) => b.counter - a.counter);
 			return storage.data.users.reduce((acc, val, i) => {
 				if (i > 4) return acc;
@@ -64,7 +64,7 @@ const commands: Command[] = [
 		response: async (message, userState) => {
 			const { firstArg } = parseCommand(message, userState);
 			if (!firstArg) return 'Please provide a user';
-			const storage = container.resolve(DBStorageService);
+			const storage = container.resolve(DatabaseStorageService);
 			await storage.updateGeneral('users', firstArg.toLowerCase(), {
 				name: firstArg.toLowerCase(),
 			});
@@ -78,7 +78,7 @@ const commands: Command[] = [
 		response: async (message, userState) => {
 			const { firstArg } = parseCommand(message, userState);
 			if (!firstArg) return 'Please provide a user';
-			const storage = container.resolve(DBStorageService);
+			const storage = container.resolve(DatabaseStorageService);
 			let res = await storage.deleteGeneral('users', firstArg.toLowerCase());
 			if (!res) {
 				console.error('Untrust failed:', message, storage);

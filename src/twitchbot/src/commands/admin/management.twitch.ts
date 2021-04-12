@@ -1,6 +1,6 @@
 import { Command } from '@mytypes/types';
 import { Collections } from '@services/mongoDB';
-import { DBStorageService } from '@services/storageService';
+import { DatabaseStorageService } from '@services/storageService';
 import { TwitchIRCService } from '@services/twitchIRC';
 import { ChatUserstate } from 'tmi.js';
 import { container } from 'tsyringe';
@@ -37,7 +37,7 @@ function updateFactory(type: keyof Collections, trigger = false) {
 	return async (message: string, userState: ChatUserstate) => {
 		const { firstArg, args } = parseCommand(message, userState);
 		if (!firstArg || (!trigger && !args)) return 'pls provide correct args';
-		const storage = container.resolve(DBStorageService);
+		const storage = container.resolve(DatabaseStorageService);
 		let res = await storage.updateGeneral(type, firstArg, {
 			name: firstArg,
 			response: trigger && args.length === 0 ? null : args,
@@ -59,7 +59,7 @@ function deleteFactory(type: keyof Collections) {
 	return async (message: string, userState: ChatUserstate) => {
 		const { firstArg } = parseCommand(message, userState);
 		if (!firstArg) return 'pls provide correct args';
-		const storage = container.resolve(DBStorageService);
+		const storage = container.resolve(DatabaseStorageService);
 		let res = await storage.deleteGeneral(type, firstArg);
 		if (!res) {
 			console.error('Message failed: ', message);

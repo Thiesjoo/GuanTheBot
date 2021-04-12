@@ -1,23 +1,22 @@
 import 'reflect-metadata';
 import { container } from 'tsyringe';
 import { ObjectConstructor } from '../../src/@types/object';
+import { Command, Trigger, TrustedUser } from '../../src/@types/types';
 
 import { DatabaseService } from '../../src/services/mongoDB';
 
-import { DBStorageService } from '../../src/services/storageService';
-import { MockDatabase } from './dbMock';
+import { DatabaseStorageService } from '../../src/services/storageService';
+import { MockDatabase } from '../MOCKS/dbMock';
 
 describe('test dbmock', () => {
-	let dbMock: DatabaseService;
+	let dbMock: MockDatabase;
 	beforeAll(() => {
-		container.registerSingleton(DBStorageService);
+		container.registerSingleton(DatabaseStorageService);
 	});
 	beforeEach(() => {
 		container.clearInstances();
 
-		let mockedDatabase = (new MockDatabase() as unknown) as DatabaseService;
-		container.registerInstance(DatabaseService, mockedDatabase);
-		dbMock = container.resolve(DatabaseService);
+		dbMock = new MockDatabase();
 	});
 
 	it('should insert objects correcly', async () => {
@@ -67,7 +66,7 @@ describe('test dbmock', () => {
 		expect.assertions(4);
 
 		const colName = 'triggers';
-		const key = 'key';
+		const key = 'counter';
 		const name = 'name';
 
 		const initialValue = 1;
@@ -99,39 +98,35 @@ describe('test dbmock', () => {
 });
 
 describe('test storageService', () => {
-	let service: DBStorageService;
+	let service: DatabaseStorageService;
 	let dbMock: DatabaseService;
 	beforeAll(() => {
-		container.registerSingleton(DBStorageService);
+		container.registerSingleton(DatabaseStorageService);
 	});
 	beforeEach(() => {
 		container.clearInstances();
 
 		let mockedDatabase = (new MockDatabase() as unknown) as DatabaseService;
 		container.registerInstance(DatabaseService, mockedDatabase);
-		service = container.resolve(DBStorageService);
+		service = container.resolve(DatabaseStorageService);
 		dbMock = container.resolve(DatabaseService);
 	});
 	it('service should be initialized', () => {
-		let service = container.resolve(DBStorageService);
+		let service = container.resolve(DatabaseStorageService);
 		service.data.listening.push({ name: 'truasd' });
 		expect(service).toBeTruthy();
 	});
 	it('initial data should have a length of 0', () => {
-		let service = container.resolve(DBStorageService);
+		let service = container.resolve(DatabaseStorageService);
 		(Object as ObjectConstructor).keys(service.data).forEach((x) => {
 			expect(service.data[x].length).toBe(0);
 		});
 	});
 	it('initial data from DB should have a length of 0 (updateAll)', async () => {
-		let service = container.resolve(DBStorageService);
+		let service = container.resolve(DatabaseStorageService);
 		expect.assertions(Object.keys(service.data).length);
 
 		await service.updateAll();
-
-		// expect(
-		// 	DatabaseService.mock.instances[0].getAllTriggers,
-		// ).toHaveBeenCalledTimes(5);
 
 		(Object as ObjectConstructor).keys(service.data).forEach((x) => {
 			expect(service.data[x].length).toBe(0);
@@ -144,7 +139,7 @@ describe('test storageService', () => {
 
 		const collection = 'triggers';
 		const name = 'asd';
-		const obj = { lmao: 'asd' };
+		const obj = { response: 'test ' };
 		const res = await service.updateGeneral(collection, name, obj, true);
 
 		// New object in store
@@ -170,12 +165,11 @@ describe('test storageService', () => {
 
 		const collection = 'triggers';
 		const name = 'initial trigger';
-		const objToBeUpdated = { key: 'updated value' };
+		const objToBeUpdated = { response: 'updated value' };
 
-		const fullItem = {
+		const fullItem: Trigger = {
 			name,
-			key: 'initial value',
-			test: 0,
+			response: 'initial value',
 		};
 
 		//Initialization
@@ -191,7 +185,7 @@ describe('test storageService', () => {
 		);
 		// Updated object in store
 		expect(service.data.triggers.length).toBe(1);
-		expect(service.data.triggers[0].key).toBe(objToBeUpdated.key);
+		expect(service.data.triggers[0].response).toBe(objToBeUpdated.response);
 
 		// New Updated in database
 		expect(updateSpy).toHaveBeenCalled();
@@ -250,9 +244,9 @@ describe('test storageService', () => {
 		const deleteSpy = jest.spyOn(dbMock, 'deleteOne');
 
 		const collection = 'triggers';
-		const toBeUpserted = {
+		const toBeUpserted: Trigger = {
 			name: 'initial trigger',
-			key: 'initial value',
+			response: 'initial value',
 		};
 		const name = toBeUpserted.name;
 
@@ -275,7 +269,7 @@ describe('test storageService', () => {
 
 		const updateSpy = jest.spyOn(dbMock, 'updateOne');
 
-		const initialUser = {
+		const initialUser: TrustedUser = {
 			name: 'initial user',
 			counter: 0,
 		};
@@ -322,9 +316,10 @@ describe('test storageService', () => {
 
 		const updateSpy = jest.spyOn(dbMock, 'updateOne');
 
-		const toBeUpserted = {
-			name: 'initial trigger',
+		const toBeUpserted: Command = {
+			name: 'initial command',
 			counter: 0,
+			response: 'sample response',
 		};
 		const name = toBeUpserted.name;
 		await service.updateGeneral('commands', name, toBeUpserted, true);
