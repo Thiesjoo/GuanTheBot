@@ -113,7 +113,6 @@ export class DatabaseStorageService {
 		name: string,
 	) {
 		const col: Base[] = this.data[collection];
-
 		let res = col.findIndex((x) => x.name === name);
 		if (res > -1) {
 			col.splice(res, 1);

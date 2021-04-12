@@ -19,7 +19,12 @@ describe('test db discord commands', () => {
 
 		let mockedDatabase = (new MockDatabase() as unknown) as DatabaseService;
 		container.registerInstance(DatabaseService, mockedDatabase);
-		container.registerInstance(TwitchIRCService, null);
+		container.registerInstance(TwitchIRCService, ({
+			client: {
+				part: async () => {},
+				join: async () => {},
+			},
+		} as unknown) as TwitchIRCService);
 		service = container.resolve(DatabaseStorageService);
 		dbMock = container.resolve(DatabaseService);
 	});
@@ -79,16 +84,114 @@ describe('test db discord commands', () => {
 			`%${cmdName2} ${toBeUpserted.name} ${newCount}`,
 			{},
 		);
-		console.log(cmdResult);
 		// Included name
 		expect(cmdResult).toMatch(`${toBeUpserted.name}`);
 		expect(service.data.commands.length).toBe(1);
 		expect(service.data.commands[0].counter).toBe(newCount);
 	});
 
-	test.todo('listen command should work');
-	test.todo('listen (LURK) command should work');
-	test.todo('unlisten command should work');
+	it('listen command should work', async () => {
+		expect.assertions(5);
+
+		let result = commands.find((x) => x.name === 'listen');
+		expect(result).toBeTruthy();
+		if (!result) return;
+
+		const insertSpy = jest.spyOn(dbMock, 'insertOne');
+
+		const toBeListening = {
+			name: 'initial_listener',
+			lurk: false,
+		};
+
+		expect(service.data.listening.length).toBe(0);
+
+		await getRes(result, `%listen ${toBeListening.name}`, {});
+		// Included name
+		expect(service.data.listening.length).toBe(1);
+		expect(service.data.listening[0].lurk).toBe(false);
+		expect(insertSpy).toHaveBeenCalledWith('listening', toBeListening);
+	});
+	it('listen (LURK) command should work', async () => {
+		expect.assertions(6);
+
+		let result = commands.find((x) => x.name === 'listen');
+		expect(result).toBeTruthy();
+		if (!result) return;
+
+		const insertSpy = jest.spyOn(dbMock, 'insertOne');
+
+		const toBeListening = {
+			name: 'initial_listener',
+			lurk: true,
+		};
+
+		expect(service.data.listening.length).toBe(0);
+
+		await getRes(result, `%listen ${toBeListening.name} true`, {});
+		// Included name
+		expect(service.data.listening.length).toBe(1);
+		expect(service.data.listening[0].lurk).toBe(true);
+		expect(insertSpy).toHaveBeenCalled();
+		expect(insertSpy).toHaveBeenCalledWith('listening', toBeListening);
+	});
+	it('listen (LURK) command should update existing listener', async () => {
+		expect.assertions(5);
+
+		let result = commands.find((x) => x.name === 'listen');
+		expect(result).toBeTruthy();
+		if (!result) return;
+
+		const toBeListening = {
+			name: 'initial_listener',
+			lurk: false,
+		};
+
+		await service.updateGeneral(
+			'listening',
+			toBeListening.name,
+			toBeListening,
+			true,
+		);
+
+		const updateSpy = jest.spyOn(dbMock, 'updateOne');
+		expect(service.data.listening.length).toBe(1);
+
+		await getRes(result, `%listen ${toBeListening.name} true`, {});
+		// Included name
+		expect(service.data.listening.length).toBe(1);
+		expect(service.data.listening[0].lurk).toBe(true);
+		expect(updateSpy).toHaveBeenCalled();
+	});
+
+	it('unlisten command should work', async () => {
+		expect.assertions(4);
+
+		let result = commands.find((x) => x.name === 'unlisten');
+		expect(result).toBeTruthy();
+		if (!result) return;
+
+		const deleteSpy = jest.spyOn(dbMock, 'deleteOne');
+
+		const toBeListening = {
+			name: 'initiallistener',
+			lurk: false,
+		};
+
+		await service.updateGeneral(
+			'listening',
+			toBeListening.name,
+			toBeListening,
+			true,
+		);
+		expect(service.data.listening.length).toBe(1);
+
+		await getRes(result, `%unlisten ${toBeListening.name}`, {});
+
+		// Included name
+		expect(service.data.listening.length).toBe(0);
+		expect(deleteSpy).toHaveBeenCalled();
+	});
 });
 
 async function getRes(

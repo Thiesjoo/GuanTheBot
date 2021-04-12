@@ -258,7 +258,7 @@ describe('test storageService', () => {
 			},
 		);
 	});
-	it('should fail to increase command counter when command doesnt exist', async () => {
+	it("should fail to increase command counter when command doesn't exist", async () => {
 		expect.assertions(4);
 
 		const updateSpy = jest.spyOn(dbMock, 'updateOne');
