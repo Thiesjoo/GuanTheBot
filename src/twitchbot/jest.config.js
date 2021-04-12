@@ -11,4 +11,7 @@ module.exports = {
 	moduleNameMapper: pathsToModuleNameMapper(pathCopy, {
 		prefix: '<rootDir>/',
 	}),
+	setupFiles: [
+		"./test/jest.startup.ts"
+	]
 };

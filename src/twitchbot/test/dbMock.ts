@@ -4,7 +4,7 @@ import {
 	TrustedUser,
 	Reaction,
 	Listening,
-} from '../../src/@types/types';
+} from '../src/@types/types';
 
 export class MockDatabase {
 	initDb: any;
