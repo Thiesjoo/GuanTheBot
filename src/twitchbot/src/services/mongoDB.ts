@@ -15,7 +15,6 @@ import {
 	InsertOneWriteOpResult,
 	MongoClient,
 	UpdateQuery,
-	UpdateWriteOpResult,
 	WithId,
 } from 'mongodb';
 

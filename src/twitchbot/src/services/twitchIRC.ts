@@ -5,6 +5,7 @@ import { DatabaseStorageService } from './storageService';
 import ExtraCommands from '../commands/index.twitch';
 import { Command } from '@mytypes/index';
 import * as Mustache from 'mustache-async';
+import { parseCommand } from '../commands/parseCommands';
 @AutoInjectable()
 export class TwitchIRCService {
 	client: Client;
@@ -71,34 +72,11 @@ export class TwitchIRCService {
 				)
 					return;
 
-				// Parse the command. Will return array with ['command', ...args]
-				const tempCommand = message
-					.match(/\%\w+|\w+|"[^"]+"/g)
-					?.map((x) => x.replace(/\"/g, ''));
-
-				const command = tempCommand?.shift()?.slice(1) || '';
-
 				if (message[0] === '%') {
-					let res: Command | undefined;
-
-					//Admin commands
-					if (username === this.config.adminUser) {
-						res = this.extraCommands.find((x) =>
-							x.admin && typeof x.name === 'string'
-								? x.name === command
-								: x.name.includes(command),
-						);
-					}
-
-					//User special commands
-					if (!res) {
-						res = this.extraCommands.find((x) => x.name === command);
-					}
-
-					//Default commands
-					if (!res) {
-						res = this.dbStorage.data.commands.find((x) => x.name === command);
-					}
+					let res = this.getCommand(
+						username,
+						parseCommand(message, userState).command || '',
+					);
 
 					let toSend: string = '';
 					// Handle calling async responses
@@ -143,6 +121,30 @@ export class TwitchIRCService {
 				}
 			});
 		});
+	}
+
+	private getCommand(username: string, command: string): Command | undefined {
+		if (!username || !command) return undefined;
+		let res: Command | undefined;
+		//Admin commands
+		if (username === this.config.adminUser) {
+			res = this.extraCommands.find((x) =>
+				x.admin && typeof x.name === 'string'
+					? x.name === command
+					: x.name.includes(command),
+			);
+		}
+
+		//User special commands
+		if (!res) {
+			res = this.extraCommands.find((x) => x.name === command);
+		}
+
+		//Default commands
+		if (!res) {
+			res = this.dbStorage.data.commands.find((x) => x.name === command);
+		}
+		return res;
 	}
 
 	/** Replace count variable in the  */

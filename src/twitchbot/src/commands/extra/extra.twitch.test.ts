@@ -1,4 +1,3 @@
-import { Trigger, TrustedUser } from '@mytypes/types';
 import { TwitchIRCService } from '@services/twitchIRC';
 import { container } from 'tsyringe';
 import { DatabaseService } from '../../../src/services/mongoDB';

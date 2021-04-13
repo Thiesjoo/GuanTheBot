@@ -4,8 +4,6 @@ import { DatabaseService } from '../services/mongoDB';
 import { DatabaseStorageService } from '../services/storageService';
 import { MockDatabase } from '../../test';
 import { parseCommand, ParseCommandResult } from './parseCommands';
-import { ChatUserstate } from 'tmi.js';
-
 describe('test extra user commands(twitch)', () => {
 	let service: DatabaseStorageService;
 	let dbMock: DatabaseService;
@@ -104,7 +102,7 @@ describe('test extra user commands(twitch)', () => {
 			_testDesc: string,
 			input: string,
 			state: { username?: string },
-			endResult: ParseCommandResult,
+			endResult: Partial<ParseCommandResult>,
 		) => {
 			let res = parseCommand('%' + input, state);
 

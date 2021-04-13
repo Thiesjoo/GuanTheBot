@@ -1,12 +1,12 @@
 import { Userstate } from 'tmi.js';
 
 export type ParseCommandResult = {
-	message?: string;
-	command?: string | undefined;
-	firstArg?: string | undefined;
-	fullArgs?: string;
-	args?: string;
-	taggedUsername?: string;
+	message: string;
+	command: string | undefined;
+	firstArg: string | undefined;
+	fullArgs: string;
+	args: string;
+	taggedUsername: string;
 };
 
 export function parseCommand(
