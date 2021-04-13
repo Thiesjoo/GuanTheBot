@@ -2,6 +2,7 @@ application:
   name: "twitchtestbot"
   project: "twitchTestBot"
   organization: "QoveryCommunity"
+  dockerfile: "src/twitchbot/Dockerfile"
   depends_on:
     - "my-mongodb"
 databases:

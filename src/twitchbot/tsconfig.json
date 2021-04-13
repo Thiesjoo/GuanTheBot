@@ -1,0 +1,23 @@
+{
+	"compilerOptions": {
+		"module": "commonjs",
+		"target": "es2019",
+		"strict": true,
+		"strictPropertyInitialization": false,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"removeComments": true,
+		"emitDecoratorMetadata": true,
+		"experimentalDecorators": true,
+		"outDir": "dist",
+		"baseUrl": "./",
+		"paths": {
+			"@helpers/*": ["src/helpers/*"],
+			"@services/*": ["src/services/*"],
+			"@mytypes/*": ["src/@types/*"],
+			"*": ["src/@types/*"]
+		}
+	},
+	"include": ["./src/**/*"],
+	"exclude": ["./src/main2.ts"]
+}

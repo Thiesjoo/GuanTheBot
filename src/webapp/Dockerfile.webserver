@@ -4,7 +4,7 @@ ARG NODE_VERSION=14.15.4
 # Cached dependencies
 FROM alpine:${ALPINE_VERSION} AS deps
 
-RUN apk --no-cache add jq openssh
+RUN apk --no-cache add jq
 
 COPY package.json .
 COPY package-lock.json .
@@ -16,10 +16,11 @@ RUN (jq '.version = "1.0.0"' | jq '.packages."".version = "1.0.0"') < package-lo
 FROM node:${NODE_VERSION}-alpine${ALPINE_VERSION} as production
 
 WORKDIR /usr/src
-
+ 
 RUN chown node:node /usr/src && \
   apk add --no-cache dumb-init mongodb-tools wget
 
+# Mongodb extra certs
 RUN wget https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem
 
 COPY --from=deps --chown=node:node deps.json ./package.json
