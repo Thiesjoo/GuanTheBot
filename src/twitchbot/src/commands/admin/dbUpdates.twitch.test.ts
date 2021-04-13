@@ -1,13 +1,11 @@
-import { Command } from '@mytypes/types';
 import { TwitchIRCService } from '@services/twitchIRC';
-import { ChatUserstate } from 'tmi.js';
 import { container } from 'tsyringe';
 import { DatabaseService } from '../../../src/services/mongoDB';
 import { DatabaseStorageService } from '../../../src/services/storageService';
-import { MockDatabase } from '../../../test/dbMock';
+import { MockDatabase, getRes } from '../../../test';
 import commands from './dbUpdates.twitch';
 
-describe('test db discord commands', () => {
+describe('test db update commands(twitch)', () => {
 	let service: DatabaseStorageService;
 	let dbMock: DatabaseService;
 	beforeAll(() => {
@@ -192,15 +190,3 @@ describe('test db discord commands', () => {
 		expect(deleteSpy).toHaveBeenCalled();
 	});
 });
-
-async function getRes(
-	result: Command,
-	msg: string,
-	userState: ChatUserstate = {},
-) {
-	return typeof result.response === 'string'
-		? result.response
-		: typeof result.response === 'function'
-		? await result.response(msg, userState)
-		: '';
-}
