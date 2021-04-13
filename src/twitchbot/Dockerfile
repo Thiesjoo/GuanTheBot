@@ -8,8 +8,9 @@ ARG WORKINGDIR
 
 WORKDIR /usr/builder
 COPY . . 
-RUN echo "$WORKINGDIR"
-RUN cd "$WORKINGDIR" && npm i && npm run build
+RUN echo "Installing in: $WORKINGDIR"
+RUN cd "$WORKINGDIR" && npm ci && npm run build 
+RUN cd "$WORKINGDIR" && npm run test
 
 # Production image with only the necessary files and directories to run the application.
 FROM node:${NODE_VERSION}-alpine${ALPINE_VERSION} as production
