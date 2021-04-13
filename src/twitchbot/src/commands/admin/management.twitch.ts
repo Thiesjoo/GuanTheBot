@@ -65,6 +65,7 @@ function deleteFactory(type: keyof Collections) {
 			console.error('Message failed: ', message);
 			return 'Deletion failed';
 		}
+		return 'deleted ' + type;
 	};
 }
 

@@ -4,7 +4,6 @@ import { container } from 'tsyringe';
 import { registerIOCContainer } from './helpers/tsyringe';
 import { DatabaseService } from './services/mongoDB';
 import { DatabaseStorageService } from './services/storageService';
-import { TwitchAPIService } from './services/twitchAPI';
 import { TwitchIRCService } from './services/twitchIRC';
 
 const envPropsArr: (string | string[])[] = [
