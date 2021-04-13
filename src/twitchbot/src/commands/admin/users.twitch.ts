@@ -81,7 +81,7 @@ const commands: Command[] = [
 			const storage = container.resolve(DatabaseStorageService);
 			let res = await storage.deleteGeneral('users', firstArg.toLowerCase());
 			if (!res) {
-				console.error('Untrust failed:', message, storage);
+				console.error('Untrust failed for user:', message);
 				return 'fuck';
 			}
 			return `@${firstArg}, d'doei`;

@@ -5,7 +5,6 @@ import { container } from 'tsyringe';
 import { DatabaseService } from '../../../src/services/mongoDB';
 import { DatabaseStorageService } from '../../../src/services/storageService';
 import { MockDatabase } from '../../../test/dbMock';
-jest.mock('@services/twitchIRC');
 import commands from './dbUpdates.twitch';
 
 describe('test db discord commands', () => {

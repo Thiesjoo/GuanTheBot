@@ -31,4 +31,4 @@ RUN npm ci --only=production
 USER node
 
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["./node_modules/.bin/forever", "dist/main.js"]
+CMD ["./node_modules/.bin/forever", "dist/src/main.js"]

@@ -2,7 +2,9 @@ import { Userstate } from 'tmi.js';
 
 export function parseCommand(message: string, { username }: Userstate) {
 	const tempCommand =
-		message.match(/\%\w+|\w+|"[^"]+"/g)?.map((x) => x.replace(/\"/g, '')) || [];
+		message
+			.match(/\%\w+|[\w\-\+]+|"[^"]+"/g)
+			?.map((x) => x.replace(/\"/g, '')) || [];
 	const command = tempCommand?.shift()?.slice(1);
 
 	const fullArgs = tempCommand.join(' ');
