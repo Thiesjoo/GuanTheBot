@@ -30,6 +30,7 @@ COPY --from=builder --chown=node:node /usr/builder/${WORKINGDIR}/dist ./dist
 RUN npm ci --only=production
 
 USER node
+EXPOSE 8080
 
 ENTRYPOINT ["dumb-init", "--"]
 CMD ["./node_modules/.bin/forever", "dist/main.js"]

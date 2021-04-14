@@ -23,4 +23,4 @@ routers:
     routes:
       - application_name: "webapp"
         paths:
-          - "/*"
+          - /
