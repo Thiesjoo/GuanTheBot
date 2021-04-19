@@ -29,7 +29,6 @@ WRA_KEY=the api key from wolframalpha
 ## Installation
 
 Bot:
-
 ```bash
 cd src/twitchbot
 npm i
