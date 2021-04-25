@@ -121,10 +121,26 @@ describe('test db user commands(twitch)', () => {
 		expect(res).toMatch(intialUser.name);
 		expect(updateSpy).not.toHaveBeenCalled();
 	});
-	it(`should run ${cmdName2} command, with triggers`, async () => {
+	it(`should run ${cmdName2} command, with no users`, async () => {
 		expect.assertions(4);
 
 		let result = commands.find((x) => x.name === cmdName2);
+		expect(result).toBeTruthy();
+		if (!result) return;
+
+		const updateSpy = jest.spyOn(dbMock, 'updateOne');
+		expect(service.data.users.length).toBe(0);
+
+		const res = await getRes(result, `%${cmdName2} randomname`, {});
+
+		expect(res).toMatch('niet gevonden');
+		expect(updateSpy).not.toHaveBeenCalled();
+	});
+
+	it(`should run triggers command`, async () => {
+		expect.assertions(4);
+
+		let result = commands.find((x) => x.name === 'triggers');
 		expect(result).toBeTruthy();
 		if (!result) return;
 
@@ -145,23 +161,8 @@ describe('test db user commands(twitch)', () => {
 		const updateSpy = jest.spyOn(dbMock, 'updateOne');
 		expect(service.data.triggers.length).toBe(amt);
 
-		const res = await getRes(result, `%${cmdName2} triggers`, {});
+		const res = await getRes(result, `%triggers`, {});
 		expect(res).toMatch(amt.toString());
-		expect(updateSpy).not.toHaveBeenCalled();
-	});
-	it(`should run ${cmdName2} command, with no users`, async () => {
-		expect.assertions(4);
-
-		let result = commands.find((x) => x.name === cmdName2);
-		expect(result).toBeTruthy();
-		if (!result) return;
-
-		const updateSpy = jest.spyOn(dbMock, 'updateOne');
-		expect(service.data.users.length).toBe(0);
-
-		const res = await getRes(result, `%${cmdName2} randomname`, {});
-
-		expect(res).toMatch('niet gevonden');
 		expect(updateSpy).not.toHaveBeenCalled();
 	});
 

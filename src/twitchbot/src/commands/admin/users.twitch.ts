@@ -29,10 +29,6 @@ const commands: Command[] = [
 			const { taggedUsername } = parseCommand(message, userState);
 			const storage = container.resolve(DatabaseStorageService);
 
-			if (taggedUsername === 'triggers') {
-				return `Er zijn nu al ${storage.data.triggers.length} triggers in de database`;
-			}
-
 			let user = storage.data.users.find(
 				(x) => x.name === taggedUsername.toLowerCase(),
 			);
@@ -40,6 +36,15 @@ const commands: Command[] = [
 				return 'Die gebruiker is niet gevonden';
 			}
 			return `${taggedUsername} heeft nu al ${user.counter} iets verkeerd getypdt`;
+		},
+	},
+	{
+		name: 'triggers',
+		reaction: false,
+		response: async (message, userState) => {
+			const storage = container.resolve(DatabaseStorageService);
+
+			return `Er zijn nu al ${storage.data.triggers.length} triggers in de database`;
 		},
 	},
 	{
