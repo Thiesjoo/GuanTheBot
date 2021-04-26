@@ -137,7 +137,7 @@ export class TwitchIRCService {
 
 		//User special commands
 		if (!res) {
-			res = this.extraCommands.find((x) => x.name === command);
+			res = this.extraCommands.find((x) => !x.admin && x.name === command);
 		}
 
 		//Default commands
