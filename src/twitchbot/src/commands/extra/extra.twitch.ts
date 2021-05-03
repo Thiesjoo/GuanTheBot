@@ -3,10 +3,19 @@ import { Command } from '@mytypes/types';
 import axios from 'axios';
 import { container } from 'tsyringe';
 import { parseCommand } from '../parseCommands';
+import Uwuifier from 'uwuifier';
+const uwuifier = new Uwuifier();
 
 let lastTime = 0;
 
 const commands: Command[] = [
+	{
+		name: 'uwu',
+		reaction: false,
+		response: async (message, userState) => {
+			return uwuifier.uwuifySentence(parseCommand(message, userState).fullArgs);
+		},
+	},
 	{
 		name: 'hug',
 		reaction: false,

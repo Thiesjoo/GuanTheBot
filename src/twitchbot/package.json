@@ -21,7 +21,8 @@
 		"mustache-async": "^0.1.3",
 		"reflect-metadata": "^0.1.13",
 		"tmi.js": "^1.7.2",
-		"tsyringe": "^4.5.0"
+		"tsyringe": "^4.5.0",
+		"uwuifier": "^3.0.0"
 	},
 	"devDependencies": {
 		"@types/jest": "^26.0.22",
