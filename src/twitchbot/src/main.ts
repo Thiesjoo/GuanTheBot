@@ -56,7 +56,7 @@ async function main() {
 	//Init socket service
 	//Init discord bot
 
-	// await ircService.listenForMessages();
+	twitchService.listenForMessages();
 	await discordService.listenForMessages();
 
 	console.log('end of main');
