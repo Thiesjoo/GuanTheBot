@@ -1,7 +1,6 @@
 import { ConfigService } from '@helpers/configuration';
 import { AutoInjectable } from '@helpers/tsyringe.reexport';
 import {
-	Channel,
 	Client,
 	DMChannel,
 	Message,
@@ -54,8 +53,6 @@ export class DiscordService {
 					username === this.config.tmiIdentity.username
 				)
 					return;
-
-				console.log(username, displayName, message);
 
 				if (
 					username !== this.config.adminUser &&

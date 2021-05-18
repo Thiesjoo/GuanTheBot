@@ -13,7 +13,6 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
-		"8ball": "^1.0.6",
 		"await-exec": "^0.1.2",
 		"axios": "^0.21.1",
 		"discord.js": "^12.5.3",
