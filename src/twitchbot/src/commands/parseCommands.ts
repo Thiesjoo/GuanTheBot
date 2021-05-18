@@ -1,4 +1,4 @@
-import { Userstate } from 'tmi.js';
+import { ChatUserstate, Userstate } from 'tmi.js';
 
 export type ParseCommandResult = {
 	message: string;
@@ -11,11 +11,11 @@ export type ParseCommandResult = {
 
 export function parseCommand(
 	message: string,
-	{ username }: Userstate,
+	{ username }: { username: string } | Userstate,
 ): ParseCommandResult {
 	const tempCommand =
 		message
-			.match(/\%\w+|[\w\-\+]+|"[^"]+"/g)
+			.match(/\%\w+|[\w\-\<\>\:\+]+|"[^"]+"/g)
 			?.map((x) => x.replace(/\"/g, '')) || [];
 	const command = tempCommand.shift()?.slice(1);
 

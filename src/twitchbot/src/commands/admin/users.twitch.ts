@@ -35,7 +35,7 @@ const commands: Command[] = [
 			if (!user) {
 				return 'Die gebruiker is niet gevonden';
 			}
-			return `${taggedUsername} heeft nu al ${user.counter} iets verkeerd getypdt`;
+			return `${taggedUsername} heeft nu al ${user.counter} keer iets verkeerd getypdt`;
 		},
 	},
 	{

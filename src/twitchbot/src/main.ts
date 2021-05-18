@@ -5,6 +5,7 @@ import { registerIOCContainer } from './helpers/tsyringe';
 import { DatabaseService } from './services/mongoDB';
 import { DatabaseStorageService } from './services/storageService';
 import { TwitchIRCService } from './services/twitchIRC';
+import { DiscordService } from '@services/discordInteractions';
 
 const envPropsArr: (string | string[])[] = [
 	['QOVERY_DATABASE_MY_MONGODB_CONNECTION_URI' || 'MONGO_URL'],
@@ -42,16 +43,22 @@ async function main() {
 
 	const storageService = container.resolve(DatabaseStorageService);
 	await storageService.updateAll();
-	console.log('Got all data');
+	console.log('Got user all data');
 
-	const ircService = container.resolve(TwitchIRCService);
-	await ircService.initTwitchClient();
-	console.log('IRC initialized (twitch)');
+	const twitchService = container.resolve(TwitchIRCService);
+	await twitchService.initClient();
+	console.log('Twitch IRC initialized');
+
+	const discordService = container.resolve(DiscordService);
+	await discordService.initClient();
+	console.log('Discord initialized');
 
 	//Init socket service
 	//Init discord bot
 
-	await ircService.listenForMessages();
+	twitchService.listenForMessages();
+	await discordService.listenForMessages();
+
 	console.log('end of main');
 }
 

@@ -7,8 +7,39 @@ import Uwuifier from 'uwuifier';
 const uwuifier = new Uwuifier();
 
 let lastTime = 0;
+const responses = [
+	'it is certain',
+	'it is decidedly so',
+	'without a doubt',
+	'yes — definitely',
+	'you may rely on it',
+	'as I see it, yes',
+	'most likely',
+	'outlook good',
+	'yes',
+	'signs point to yes',
+	'reply hazy, try again',
+	'ask again later',
+	'better not tell you now',
+	'cannot predict now',
+	'concentrate and ask again',
+	'don’t count on it',
+	'my reply is no',
+	'my sources say no',
+	'outlook not so good',
+	'very doubtful',
+	'no',
+	'fuck you',
+];
 
 const commands: Command[] = [
+	{
+		name: '8ball',
+		reaction: true,
+		response: async () => {
+			return responses[Math.floor(Math.random() * responses.length)];
+		},
+	},
 	{
 		name: 'uwu',
 		reaction: false,
@@ -103,12 +134,10 @@ const commands: Command[] = [
 					? (outputString.length === 0 ? '' : ' v ') + x.plaintext
 					: '';
 			});
-			if (outputString.length > 50) {
-				return 'Sorry het antwoord is te lang';
-			}
+
 			lastTime = Date.now();
-			return `Het antwoord is: ${outputString.slice(0, 50)}${
-				outputString.length > 50 ? '...' : ''
+			return `Het antwoord is: ${outputString.slice(0, 100)}${
+				outputString.length > 100 ? '...' : ''
 			}`;
 		},
 	},
