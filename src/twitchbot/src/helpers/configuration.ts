@@ -35,4 +35,8 @@ export class ConfigService {
 	get wraKey() {
 		return process.env.WRA_KEY || '';
 	}
+
+	get discordToken() {
+		return process.env.DISCORD_TOKEN || '';
+	}
 }

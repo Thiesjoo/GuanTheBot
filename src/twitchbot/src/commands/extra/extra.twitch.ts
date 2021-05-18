@@ -103,12 +103,10 @@ const commands: Command[] = [
 					? (outputString.length === 0 ? '' : ' v ') + x.plaintext
 					: '';
 			});
-			if (outputString.length > 50) {
-				return 'Sorry het antwoord is te lang';
-			}
+
 			lastTime = Date.now();
-			return `Het antwoord is: ${outputString.slice(0, 50)}${
-				outputString.length > 50 ? '...' : ''
+			return `Het antwoord is: ${outputString.slice(0, 100)}${
+				outputString.length > 100 ? '...' : ''
 			}`;
 		},
 	},

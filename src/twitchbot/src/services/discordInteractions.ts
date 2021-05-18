@@ -1,15 +1,22 @@
 import { ConfigService } from '@helpers/configuration';
 import { AutoInjectable } from '@helpers/tsyringe.reexport';
-import { Client } from 'tmi.js';
+import {
+	Channel,
+	Client,
+	DMChannel,
+	Message,
+	NewsChannel,
+	TextChannel,
+} from 'discord.js';
 import { DatabaseStorageService } from './storageService';
 import ExtraCommands from '../commands/index.twitch';
 import { Command } from '@mytypes/index';
 import * as Mustache from 'mustache-async';
 import { parseCommand } from '../commands/parseCommands';
-@AutoInjectable()
-export class TwitchIRCService {
-	client: Client;
 
+@AutoInjectable()
+export class DiscordService {
+	client: Client;
 	extraCommands = ExtraCommands;
 
 	constructor(
@@ -20,38 +27,13 @@ export class TwitchIRCService {
 	/** Initialize twitch client */
 	async initClient() {
 		return new Promise<void>(async (resolve) => {
-			this.client = new Client({
-				identity: this.config.tmiIdentity,
-				connection: {
-					reconnect: true,
-					secure: true,
-				},
-				channels: [
-					...this.dbStorage.data.listening.map((x) => x.name),
-					this.config.tmiIdentity.username,
-				],
-			});
+			this.client = new Client({});
 
-			this.client.on('disconnected', (reason) => {
-				console.log({ message: 'disconnected from chat', reason });
-			});
-			this.client.on('connected', (address, port) => {
-				console.log({ message: 'connected to chat', address, port });
-			});
-			this.client.on('connecting', (address, port) => {
-				console.log({
-					message: 'connecting to chat',
-					connectionData: { address, port },
-				});
-			});
-			this.client.on('reconnect', () => {
-				console.log({ message: 'reconnecting to chat' });
-			});
+			this.client.login(this.config.discordToken);
 
-			this.client.once('connected', () => {
+			this.client.once('ready', () => {
 				resolve();
 			});
-			await this.client.connect();
 		});
 	}
 
@@ -59,11 +41,21 @@ export class TwitchIRCService {
 	async listenForMessages() {
 		//Never ending promise
 		return new Promise((_) => {
-			this.client.on('message', async (channel, userState, message, self) => {
-				const { username: _username, 'display-name': _displayName } = userState;
-				const username = _username || '';
-				const displayName = _displayName || '';
-				if (self || username === this.config.tmiIdentity.username) return;
+			this.client.on('message', async (messageData) => {
+				const message = messageData.cleanContent;
+
+				// const { username: _username, 'display-name': _displayName } = userState;
+				const username = messageData.author.username.toLowerCase();
+				const displayName =
+					messageData.guild?.member(messageData.author.id)?.nickname ||
+					messageData.author.username;
+				if (
+					messageData.author.bot ||
+					username === this.config.tmiIdentity.username
+				)
+					return;
+
+				console.log(username, displayName, message);
 
 				if (
 					username !== this.config.adminUser &&
@@ -74,27 +66,29 @@ export class TwitchIRCService {
 				if (message[0] === '%') {
 					let res = this.getCommand(
 						username,
-						parseCommand(message, userState).command || '',
+						parseCommand(message, { username: username }).command || '',
 					);
-
 					let toSend: string = '';
 					// Handle calling async responses
 					if (res && typeof res.response === 'string') {
 						toSend = res.response;
 					} else if (res && typeof res.response === 'function') {
-						toSend = (await res.response(message, userState)) || '';
+						toSend =
+							(await res.response(message, {
+								username: username,
+								'display-name': displayName,
+							})) || '';
 					} else {
 						return console.error('Command not found');
 					}
-
 					// Send reaction or just send a message
 					if (res.reaction || res.reaction === undefined) {
-						this.sendReaction(displayName, toSend, channel);
+						this.sendReaction(toSend, messageData);
 					} else {
-						this.sendMessage(toSend, channel);
+						console.log('asd', toSend, parseCommand(message, { username }));
+						this.sendMessage(toSend, messageData.channel);
 					}
 					this.dbStorage.increaseCommandCounter(res.name, 1);
-
 					return;
 				} else {
 					const triggerFound = this.dbStorage.data.triggers.find((x) =>
@@ -102,18 +96,12 @@ export class TwitchIRCService {
 					);
 					if (triggerFound) {
 						if (triggerFound.response) {
-							this.sendReaction(displayName, triggerFound.response, channel);
+							this.sendReaction(triggerFound.response, messageData);
 						} else {
 							// Update the user counter
 							await this.dbStorage.increaseUser(username, 1);
-
 							//TODO: new user typo event. (Should add event to DB and send message to webserver)
-
-							this.sendReaction(
-								displayName,
-								this.getRandomReaction().response,
-								channel,
-							);
+							this.sendReaction(this.getRandomReaction().response, messageData);
 						}
 					}
 					return;
@@ -146,7 +134,7 @@ export class TwitchIRCService {
 		return res;
 	}
 
-	/** Replace count variable in the  */
+	// /** Replace count variable in the  */
 	private async replaceVariables(msg: Command): Promise<string> {
 		if (typeof msg.response !== 'string') {
 			console.error('GOT WRONG RESPONSE');
@@ -165,43 +153,25 @@ export class TwitchIRCService {
 	}
 
 	private async sendReaction(
-		toUser: string,
 		msg: string | Command,
-		channel: string,
-	): Promise<string[] | void> {
+		channel: Message,
+	): Promise<any> {
 		if (typeof msg !== 'string') {
 			msg = await this.replaceVariables(msg);
 		}
 
-		return this.sendMessage(`${toUser}, ${msg}`, channel);
+		return channel.reply(msg);
 	}
 
 	private async sendMessage(
 		msg: string | Command,
-		channel: string,
-	): Promise<string[] | void> {
-		let foundChannel = this.dbStorage.data.listening.find(
-			(x) => x.name === channel.substr(1),
-		);
-		if (foundChannel && foundChannel.lurk !== undefined) {
-			if (foundChannel.lurk) {
-				console.log(
-					'Sending message: ',
-					`#${channel}:`,
-					msg,
-					'(AT TIME: ',
-					Date.now(),
-					')',
-				);
-				return;
-			}
-		}
-
+		channel: TextChannel | DMChannel | NewsChannel,
+	): Promise<any> {
 		if (typeof msg !== 'string') {
 			msg = await this.replaceVariables(msg);
 		}
 
-		return this.client.say(channel, msg);
+		return channel.send(msg);
 	}
 
 	private getRandomReaction() {
