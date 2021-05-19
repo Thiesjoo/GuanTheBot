@@ -1,20 +1,20 @@
 export enum CommandOptionType {
 	/** A sub-command for the application's command */
-	SUB_COMMAND = 1,
+	SUB_COMMAND = 'SUB_COMMAND',
 	/** A group of sub-commands */
-	SUB_COMMAND_GROUP = 2,
+	SUB_COMMAND_GROUP = 'SUB_COMMAND_GROUP',
 	/** A string. */
-	STRING = 3,
+	STRING = 'STRING',
 	/** An integer. */
-	INTEGER = 4,
+	INTEGER = 'INTEGER',
 	/** A boolean. */
-	BOOLEAN = 5,
+	BOOLEAN = 'BOOLEAN',
 	/** A user, this would return the user's ID in the interaction. */
-	USER = 6,
+	USER = 'USER',
 	/** A channel, this would return the channel's ID in the interaction. */
-	CHANNEL = 7,
+	CHANNEL = 'USER',
 	/** A role, this would return the role's ID in the interaction. */
-	ROLE = 8,
+	ROLE = 'ROLE',
 	/** Anything mentionable, returning the ID of the object. */
-	MENTIONABLE = 9,
+	MENTIONABLE = 'MENTIONABLE',
 }

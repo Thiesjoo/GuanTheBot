@@ -6,6 +6,8 @@ ARG WORKINGDIR=src/twitchbot
 FROM node:${NODE_VERSION}-alpine${ALPINE_VERSION} as builder
 ARG WORKINGDIR
 
+RUN apk add --no-cache git
+
 WORKDIR /usr/builder
 COPY . . 
 RUN echo "Installing in: $WORKINGDIR"
@@ -20,7 +22,7 @@ ARG WORKINGDIR
 WORKDIR /usr/src
 
 RUN chown node:node /usr/src && \
-  apk add --no-cache dumb-init mongodb-tools wget
+  apk add --no-cache dumb-init mongodb-tools wget git
  
 # Mongodb extra certs
 RUN wget https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem

@@ -45,10 +45,10 @@ export class DiscordService {
 					name: 'Syncing cmds',
 				});
 				try {
-					let toCreate =
-						//@ts-ignore
-						this.client.guilds.cache.get('839521739515625512').commands;
-					//let toCreate = client.application.commands
+					// let toCreate =
+					// 	this.client.guilds.cache.get('839521739515625512').commands;
+					//@ts-ignore
+					let toCreate = this.client.application.commands;
 					const currentCommands = await toCreate.fetch();
 
 					let promises = this.extraCommands

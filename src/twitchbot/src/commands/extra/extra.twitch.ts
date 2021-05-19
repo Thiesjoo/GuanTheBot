@@ -85,7 +85,7 @@ const commands: Command[] = [
 			{
 				name: 'person',
 				description: 'The person to hug! (Doesnt work with roles)',
-				type: CommandOptionType.MENTIONABLE,
+				type: CommandOptionType.STRING,
 				required: true,
 			},
 		],
