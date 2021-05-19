@@ -176,7 +176,8 @@ export class DiscordService {
 					displayName,
 					fndCommand,
 				);
-				interaction.reply(`(${transformed}): ${cmdResp}`);
+				interaction.reply(`> *${transformed.trim()}* \n ${cmdResp}`);
+				// interaction.followUp(cmdResp);
 				this.dbStorage.increaseCommandCounter(fndCommand.name, 1);
 			});
 
