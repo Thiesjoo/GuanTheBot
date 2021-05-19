@@ -1,6 +1,6 @@
 application:
   name: "twitchtestbot"
-  project: "twitchTestBot"
+  project: "GuanTheBot"
   organization: "QoveryCommunity"
   dockerfile: "src/twitchbot/Dockerfile"
   depends_on:
