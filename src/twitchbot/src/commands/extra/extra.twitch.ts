@@ -4,6 +4,7 @@ import axios from 'axios';
 import { container } from 'tsyringe';
 import { parseCommand } from '../parseCommands';
 import Uwuifier from 'uwuifier';
+import { CommandOptionType } from '@mytypes/discord_extra';
 const uwuifier = new Uwuifier();
 
 let lastTime = 0;
@@ -39,6 +40,15 @@ const commands: Command[] = [
 		response: async () => {
 			return responses[Math.floor(Math.random() * responses.length)];
 		},
+		description: 'Run a magic 8 ball command',
+		options: [
+			{
+				name: 'question',
+				description: 'The question you want to ask to magic 8ball',
+				type: CommandOptionType.STRING,
+				required: true,
+			},
+		],
 	},
 	{
 		name: 'uwu',
@@ -46,6 +56,15 @@ const commands: Command[] = [
 		response: async (message, userState) => {
 			return uwuifier.uwuifySentence(parseCommand(message, userState).fullArgs);
 		},
+		description: 'UwUify your sentence',
+		options: [
+			{
+				name: 'sentence',
+				description: 'The string you want to uwuify',
+				type: CommandOptionType.STRING,
+				required: true,
+			},
+		],
 	},
 	{
 		name: 'hug',
@@ -61,6 +80,15 @@ const commands: Command[] = [
 				args.length > 1 ? fullArgs : taggedUsername
 			} <3 cjoet`;
 		},
+		description: 'Hug someone!',
+		options: [
+			{
+				name: 'person',
+				description: 'The person to hug! (Doesnt work with roles)',
+				type: CommandOptionType.MENTIONABLE,
+				required: true,
+			},
+		],
 	},
 	{
 		name: 'omega',
@@ -70,6 +98,15 @@ const commands: Command[] = [
 
 			return fullArgs.replace(/o|O/g, ' OMEGALUL ');
 		},
+		description: 'Replace all Os with OMEGALUL',
+		options: [
+			{
+				name: 'sentence',
+				description: 'String to replace',
+				type: CommandOptionType.STRING,
+				required: true,
+			},
+		],
 	},
 	{
 		name: 'ask',
@@ -140,6 +177,15 @@ const commands: Command[] = [
 				outputString.length > 100 ? '...' : ''
 			}`;
 		},
+		description: 'Ask a question to Wolfram Alpha',
+		options: [
+			{
+				name: 'question',
+				description: 'The question you have',
+				type: CommandOptionType.STRING,
+				required: true,
+			},
+		],
 	},
 ];
 export default commands;

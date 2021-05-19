@@ -1,3 +1,4 @@
+import { ApplicationCommandOption } from 'discord.js';
 import { ChatUserstate } from 'tmi.js';
 
 /** Extra type for ease of use */
@@ -20,6 +21,10 @@ export type Command = Base & {
 		  ) => void | string | Promise<string | void>)
 		| string
 		| null;
+
+	//Discord
+	description?: string;
+	options?: ApplicationCommandOption[];
 };
 
 /** Trusted user of application */

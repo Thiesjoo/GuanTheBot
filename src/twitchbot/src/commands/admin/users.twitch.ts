@@ -1,3 +1,4 @@
+import { CommandOptionType } from '@mytypes/discord_extra';
 import { Command } from '@mytypes/types';
 import { DatabaseStorageService } from '@services/storageService';
 import { container } from 'tsyringe';
@@ -21,6 +22,22 @@ const commands: Command[] = [
 			}
 			return;
 		},
+
+		description: "Add typo's to user",
+		options: [
+			{
+				name: 'user',
+				description: 'User to add to, lowercase',
+				type: CommandOptionType.STRING,
+				required: true,
+			},
+			{
+				name: 'amount',
+				description: 'Amount to add/subtract',
+				type: CommandOptionType.INTEGER,
+				required: true,
+			},
+		],
 	},
 	{
 		name: 'counter',
@@ -37,6 +54,15 @@ const commands: Command[] = [
 			}
 			return `${taggedUsername} heeft nu al ${user.counter} keer iets verkeerd getypdt`;
 		},
+		description: "Get current typo's of user",
+		options: [
+			{
+				name: 'user',
+				description: 'User to add to, lowercase',
+				type: CommandOptionType.STRING,
+				required: true,
+			},
+		],
 	},
 	{
 		name: 'triggers',
@@ -46,6 +72,7 @@ const commands: Command[] = [
 
 			return `Er zijn nu al ${storage.data.triggers.length} triggers in de database`;
 		},
+		description: 'Get amount of triggers in db',
 	},
 	{
 		name: 'top',
@@ -61,6 +88,7 @@ const commands: Command[] = [
 				return acc;
 			}, '');
 		},
+		description: "Return a leaderboard of most typo's",
 	},
 	{
 		name: 'trust',
@@ -75,6 +103,15 @@ const commands: Command[] = [
 			});
 			return `@${firstArg}, welcome to the typo gang`;
 		},
+		description: 'Trust new user',
+		options: [
+			{
+				name: 'user',
+				description: 'User to add to, lowercase',
+				type: CommandOptionType.STRING,
+				required: true,
+			},
+		],
 	},
 	{
 		name: 'untrust',
@@ -91,6 +128,15 @@ const commands: Command[] = [
 			}
 			return `@${firstArg}, d'doei`;
 		},
+		description: 'Untrust a user',
+		options: [
+			{
+				name: 'user',
+				description: 'User to add to, lowercase',
+				type: CommandOptionType.STRING,
+				required: true,
+			},
+		],
 	},
 ];
 

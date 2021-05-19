@@ -15,7 +15,7 @@ export function parseCommand(
 ): ParseCommandResult {
 	const tempCommand =
 		message
-			.match(/\%\w+|[\w\-\<\>\:\+]+|"[^"]+"/g)
+			.match(/\%\w+|[\w\-\<\>\:\+\@]+|"[^"]+"/g)
 			?.map((x) => x.replace(/\"/g, '')) || [];
 	const command = tempCommand.shift()?.slice(1);
 
@@ -23,7 +23,12 @@ export function parseCommand(
 
 	const firstArg = tempCommand?.shift();
 	const args = tempCommand?.join(' ');
-	const taggedUsername = firstArg ? firstArg.replace('@', '') : username;
+	const taggedUsername = firstArg
+		? //Discord mentions start with <@
+		  firstArg.startsWith('<@')
+			? firstArg
+			: firstArg.replace('@', '')
+		: username;
 
 	return {
 		// The entire message

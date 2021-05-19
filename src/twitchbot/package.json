@@ -15,7 +15,7 @@
 	"dependencies": {
 		"await-exec": "^0.1.2",
 		"axios": "^0.21.1",
-		"discord.js": "^12.5.3",
+		"discord.js": "github:discordjs/discord.js",
 		"dotenv": "^8.2.0",
 		"forever": "^3.0.4",
 		"mongodb": "^3.6.4",
