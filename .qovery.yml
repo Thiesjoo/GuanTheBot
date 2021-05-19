@@ -1,17 +1,17 @@
 application:
-  name: "twitchtestbot"
-  project: "GuanTheBot"
-  organization: "QoveryCommunity"
-  dockerfile: "src/twitchbot/Dockerfile"
+  name: 'guanthebot'
+  project: 'GuanTheBot V2'
+  organization: 'QoveryCommunity'
+  dockerfile: 'src/twitchbot/Dockerfile'
   depends_on:
-    - "my-mongodb"
+    - 'my-mongodb'
 databases:
-  - type: "MONGODB"
+  - type: 'MONGODB'
     version: 4.4
-    name: "my-mongodb"
+    name: 'my-mongodb'
 routers:
-  - name: "main-twitchtestbot"
+  - name: 'main-twitchtestbot'
     routes:
-      - application_name: "twitchtestbot"
+      - application_name: 'twitchtestbot'
         paths:
-          - "/*"
+          - '/*'
