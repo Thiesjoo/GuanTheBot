@@ -45,10 +45,21 @@ export class DiscordService {
 					name: 'Syncing cmds',
 				});
 				try {
-					// let toCreate =
-					// 	this.client.guilds.cache.get('839521739515625512').commands;
-					//@ts-ignore
-					let toCreate = this.client.application.commands;
+					//Delete all global commands
+					// console.log(this.client.application?.commands);
+					// // let test = await this.client.application?.commands.fetch();
+					// // test?.forEach((x) => {
+					// // 	this.client.application?.commands.delete(x.id);
+					// // });
+					// console.log(await this.client.application?.commands.fetch())
+					// process.exit();
+					//ON prod, use global commands
+					let toCreate =
+						process.env.TMI_USER === 'guanthebot'
+							? //@ts-ignore
+							  this.client.application.commands
+							: //@ts-ignore
+							  this.client.guilds.cache.get('839521739515625512').commands;
 					const currentCommands = await toCreate.fetch();
 
 					let promises = this.extraCommands

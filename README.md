@@ -1,4 +1,4 @@
-# twitchTestBot
+# GuanTheBot
 
 Deployed on Qovery
 
@@ -24,6 +24,7 @@ ADMIN_USER=user with admin privilges of the app
 MONGO_URL=url to your mongodb database (mongodb://db:27017 for local dev)
 MONGO_DB=the db to store information
 WRA_KEY=the api key from wolframalpha
+DISCORD_BOT_TOKEN=token for the discord part of the bot
 ```
 
 ## Installation
