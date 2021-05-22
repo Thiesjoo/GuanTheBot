@@ -75,6 +75,29 @@ export class DatabaseService {
 		return await this.connection?.collection(collection).count(filter);
 	}
 
+	get configCollection() {
+		return this.connection?.collection('config');
+	}
+
+	async getConfig(): Promise<{ discordChannelId?: string }> {
+		return (await this.configCollection?.find({}).toArray())?.[0];
+	}
+
+	async fetchChannel(): Promise<string | undefined> {
+		return (await this.getConfig())?.discordChannelId;
+	}
+
+	async setChannel(channel: string) {
+		return await this.configCollection?.updateMany(
+			{},
+			{
+				$set: {
+					discordChannelId: channel,
+				},
+			},
+		);
+	}
+
 	async insertOne<T extends keyof Collections>(
 		collection: T,
 		docs: Collections[T],

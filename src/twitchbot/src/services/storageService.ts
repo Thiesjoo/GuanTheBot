@@ -31,6 +31,8 @@ export class DatabaseStorageService {
 		commands: [],
 	};
 
+	sendChannel?: string; //ID of channel to send events to
+
 	constructor(private db: DatabaseService) {}
 
 	async updateAll() {
@@ -41,6 +43,8 @@ export class DatabaseStorageService {
 			listening: await this.db.getAllListeners(),
 			users: await this.db.getAllUsers(),
 		};
+
+		this.sendChannel = await this.db.fetchChannel();
 	}
 
 	/** Update a document, or add a new one if the document does not exist yet */

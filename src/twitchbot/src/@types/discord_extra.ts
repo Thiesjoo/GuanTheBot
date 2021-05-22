@@ -12,7 +12,7 @@ export enum CommandOptionType {
 	/** A user, this would return the user's ID in the interaction. */
 	USER = 'USER',
 	/** A channel, this would return the channel's ID in the interaction. */
-	CHANNEL = 'USER',
+	CHANNEL = 'CHANNEL',
 	/** A role, this would return the role's ID in the interaction. */
 	ROLE = 'ROLE',
 	/** Anything mentionable, returning the ID of the object. */

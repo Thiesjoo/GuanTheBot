@@ -1,5 +1,5 @@
 import { ConfigService } from '@helpers/configuration';
-import { AutoInjectable } from '@helpers/tsyringe.reexport';
+import { AutoInjectable, Singleton } from '@helpers/tsyringe.reexport';
 import {
 	ApplicationCommandOption,
 	Client,
@@ -17,6 +17,7 @@ import * as Mustache from 'mustache-async';
 import { parseCommand } from '../commands/parseCommands';
 
 @AutoInjectable()
+@Singleton()
 export class DiscordService {
 	client: Client;
 	extraCommands = DiscordCommands;
@@ -126,6 +127,7 @@ export class DiscordService {
 	async listenForMessages() {
 		//Never ending promise
 		return new Promise((_) => {
+			//Interaction handler
 			this.client.on('interaction', async (interaction) => {
 				// If the interaction isn't a slash command, return
 				if (!interaction.isCommand()) return;
@@ -169,9 +171,10 @@ export class DiscordService {
 					fndCommand,
 				);
 				interaction.reply(`> *${transformed.trim()}* \n ${cmdResp}`);
-				// interaction.followUp(cmdResp);
 				this.dbStorage.increaseCommandCounter(fndCommand.name, 1);
 			});
+
+			//Message handler
 
 			this.client.on('message', async (messageData) => {
 				const message = messageData.cleanContent;

@@ -1,13 +1,40 @@
 import { Command } from '@mytypes/types';
 import { DatabaseStorageService } from '@services/storageService';
-import { TwitchIRCService } from '@services/twitchIRC';
-import { ChatUserstate } from 'tmi.js';
 import { container } from 'tsyringe';
 import { parseCommand } from '../parseCommands';
-import * as os from 'os';
 import { CommandOptionType } from '@mytypes/discord_extra';
+import DatabaseService from '@services/mongoDB';
+import { DiscordService } from '@services/discordInteractions';
 
 const commands: Command[] = [
+	{
+		name: 'events',
+		response: async (message, userState) => {
+			const { firstArg } = parseCommand(message, userState);
+			const discordService = container.resolve(DiscordService);
+			const storage = container.resolve(DatabaseStorageService);
+			const db = container.resolve(DatabaseService);
+
+			if (!firstArg) return;
+			console.log(storage, db, discordService);
+			console.log(
+				storage.sendChannel,
+				firstArg,
+				discordService.client.channels.fetch(firstArg),
+			);
+		},
+		description:
+			"Provide an events channel to dump all events related to Typo's",
+		options: [
+			{
+				name: 'channel',
+				description: "The new channel for event's",
+				type: CommandOptionType.CHANNEL,
+				required: true,
+			},
+		],
+	},
+
 	{
 		name: 'link',
 		response: async (message, userState) => {
