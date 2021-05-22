@@ -2,7 +2,7 @@ import { ConfigService } from '@helpers/configuration';
 import { AutoInjectable } from '@helpers/tsyringe.reexport';
 import { Client } from 'tmi.js';
 import { DatabaseStorageService } from './storageService';
-import ExtraCommands from '../commands/index.twitch';
+import { TwitchCommands } from '../commands/index';
 import { Command } from '@mytypes/index';
 import * as Mustache from 'mustache-async';
 import { parseCommand } from '../commands/parseCommands';
@@ -10,7 +10,7 @@ import { parseCommand } from '../commands/parseCommands';
 export class TwitchIRCService {
 	client: Client;
 
-	extraCommands = ExtraCommands;
+	extraCommands = TwitchCommands;
 
 	constructor(
 		private config: ConfigService,

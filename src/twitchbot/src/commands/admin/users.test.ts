@@ -4,7 +4,7 @@ import { container } from 'tsyringe';
 import { DatabaseService } from '../../../src/services/mongoDB';
 import { DatabaseStorageService } from '../../../src/services/storageService';
 import { MockDatabase, getRes } from '../../../test';
-import commands from './users.twitch';
+import commands from './users';
 
 describe('test db user commands(twitch)', () => {
 	let service: DatabaseStorageService;
@@ -17,14 +17,14 @@ describe('test db user commands(twitch)', () => {
 	beforeEach(() => {
 		container.clearInstances();
 
-		let mockedDatabase = (new MockDatabase() as unknown) as DatabaseService;
+		let mockedDatabase = new MockDatabase() as unknown as DatabaseService;
 		container.registerInstance(DatabaseService, mockedDatabase);
-		container.registerInstance(TwitchIRCService, ({
+		container.registerInstance(TwitchIRCService, {
 			client: {
 				part: async () => {},
 				join: async () => {},
 			},
-		} as unknown) as TwitchIRCService);
+		} as unknown as TwitchIRCService);
 		service = container.resolve(DatabaseStorageService);
 		dbMock = container.resolve(DatabaseService);
 	});

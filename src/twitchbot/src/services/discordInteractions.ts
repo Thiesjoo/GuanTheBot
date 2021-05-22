@@ -11,7 +11,7 @@ import {
 	TextChannel,
 } from 'discord.js';
 import { DatabaseStorageService } from './storageService';
-import ExtraCommands from '../commands/index.twitch';
+import { DiscordCommands } from '../commands/index';
 import { Command } from '@mytypes/index';
 import * as Mustache from 'mustache-async';
 import { parseCommand } from '../commands/parseCommands';
@@ -19,7 +19,7 @@ import { parseCommand } from '../commands/parseCommands';
 @AutoInjectable()
 export class DiscordService {
 	client: Client;
-	extraCommands = ExtraCommands;
+	extraCommands = DiscordCommands;
 
 	map: Record<string, Command> = {};
 

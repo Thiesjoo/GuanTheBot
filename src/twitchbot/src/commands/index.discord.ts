@@ -12,4 +12,4 @@ const all: Command[] = [
 ];
 
 export default all;
-export const TwitchCommands = all;
+export const DiscordCommands = all;

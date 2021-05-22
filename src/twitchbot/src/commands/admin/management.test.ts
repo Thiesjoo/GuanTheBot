@@ -4,7 +4,7 @@ import { container } from 'tsyringe';
 import { Collections, DatabaseService } from '../../../src/services/mongoDB';
 import { DatabaseStorageService } from '../../../src/services/storageService';
 import { MockDatabase, getRes } from '../../../test';
-import commands from './management.twitch';
+import commands from './management';
 
 describe('test management commands(twitch)', () => {
 	let service: DatabaseStorageService;
@@ -17,14 +17,14 @@ describe('test management commands(twitch)', () => {
 	beforeEach(() => {
 		container.clearInstances();
 
-		let mockedDatabase = (new MockDatabase() as unknown) as DatabaseService;
+		let mockedDatabase = new MockDatabase() as unknown as DatabaseService;
 		container.registerInstance(DatabaseService, mockedDatabase);
-		container.registerInstance(TwitchIRCService, ({
+		container.registerInstance(TwitchIRCService, {
 			client: {
 				part: async () => {},
 				join: async () => {},
 			},
-		} as unknown) as TwitchIRCService);
+		} as unknown as TwitchIRCService);
 		service = container.resolve(DatabaseStorageService);
 		dbMock = container.resolve(DatabaseService);
 	});
@@ -37,7 +37,7 @@ describe('test management commands(twitch)', () => {
 	])(
 		`should run %s command, with no existing %s, empty response=%s`,
 		async (cmdName, _col: string, trigger = false) => {
-			let col = (_col as keyof Collections) as
+			let col = _col as keyof Collections as
 				| 'reactions'
 				| 'commands'
 				| 'triggers';
@@ -69,7 +69,7 @@ describe('test management commands(twitch)', () => {
 	])(
 		`should run %s command, with existing %s, empty response=%s`,
 		async (cmdName, _col: string, trigger = false) => {
-			let col = (_col as keyof Collections) as
+			let col = _col as keyof Collections as
 				| 'reactions'
 				| 'commands'
 				| 'triggers';
@@ -114,7 +114,7 @@ describe('test management commands(twitch)', () => {
 	])(
 		`should run %s command, with %s, with existing = %s`,
 		async (cmdName, _col: string, existing = true) => {
-			let col = (_col as keyof Collections) as 'reactions' | 'commands';
+			let col = _col as keyof Collections as 'reactions' | 'commands';
 			expect.assertions(4);
 
 			let result = commands.find((x) => x.name === cmdName);
