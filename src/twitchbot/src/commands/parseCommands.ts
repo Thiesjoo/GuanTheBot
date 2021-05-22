@@ -1,11 +1,17 @@
 import { ChatUserstate, Userstate } from 'tmi.js';
 
 export type ParseCommandResult = {
+	/** The entire message, reexported */
 	message: string;
+	/** The command (The intial word after %) */
 	command: string | undefined;
-	firstArg: string | undefined;
+	/** Everything except the command */
 	fullArgs: string;
+	/** The first argument after a command */
+	firstArg: string | undefined;
+	/** The rest of the args, except firstArg  */
 	args: string;
+	/** The user tagged, without @  */
 	taggedUsername: string;
 };
 

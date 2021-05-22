@@ -28,7 +28,7 @@ export type Command = Base & {
 };
 
 /** Trusted user of application */
-export type TrustedUser = Base & { counter: number };
+export type TrustedUser = Base & { counter: number; dcId?: string };
 
 /** Reaction to TYPO */
 export type Reaction = Base & response;

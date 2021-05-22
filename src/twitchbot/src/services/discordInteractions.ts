@@ -45,14 +45,6 @@ export class DiscordService {
 					name: 'Syncing cmds',
 				});
 				try {
-					//Delete all global commands
-					// console.log(this.client.application?.commands);
-					// // let test = await this.client.application?.commands.fetch();
-					// // test?.forEach((x) => {
-					// // 	this.client.application?.commands.delete(x.id);
-					// // });
-					// console.log(await this.client.application?.commands.fetch())
-					// process.exit();
 					//ON prod, use global commands
 					let toCreate =
 						process.env.TMI_USER === 'guanthebot'
@@ -155,11 +147,11 @@ export class DiscordService {
 				const transformed = `%${
 					interaction.commandName
 				} ${interaction.options.reduce((acc, val) => {
-					console.log(val);
 					return (
 						acc +
+						'"' +
 						(val.type === 'MENTIONABLE' ? `<@${val.value}>` : val.value) +
-						' '
+						'" '
 					);
 				}, '')}`;
 
@@ -170,7 +162,7 @@ export class DiscordService {
 				}
 
 				console.log('Transformed interaction to: ', transformed);
-				const cmdResp = await this.test(
+				const cmdResp = await this.parseResponse(
 					transformed,
 					username,
 					displayName,
@@ -193,11 +185,18 @@ export class DiscordService {
 				)
 					return;
 
-				if (
-					username !== this.config.adminUser &&
-					!this.dbStorage.data.users.find((x) => x.name === username)
-				)
-					return;
+				let foundUser = this.dbStorage.data.users.find(
+					(x) => x.name === username || x?.dcId === messageData.author.id,
+				);
+
+				if (username !== this.config.adminUser && !foundUser) return;
+				if (!foundUser) {
+					//Temporary object to satisfy ts
+					foundUser = {
+						name: this.config.adminUser,
+						counter: 0,
+					};
+				}
 
 				if (message[0] === '%') {
 					let res = this.getCommand(
@@ -205,14 +204,18 @@ export class DiscordService {
 						parseCommand(message, { username: username }).command || '',
 					);
 
-					let toSend = await this.test(message, username, displayName, res);
+					let toSend = await this.parseResponse(
+						message,
+						username,
+						displayName,
+						res,
+					);
 
 					if (toSend && res) {
 						// Send reaction or just send a message
 						if (res.reaction || res.reaction === undefined) {
 							this.sendReaction(toSend, messageData);
 						} else {
-							console.log('asd', toSend, parseCommand(message, { username }));
 							this.sendMessage(toSend, messageData.channel);
 						}
 						this.dbStorage.increaseCommandCounter(res.name, 1);
@@ -227,7 +230,7 @@ export class DiscordService {
 							this.sendReaction(triggerFound.response, messageData);
 						} else {
 							// Update the user counter
-							await this.dbStorage.increaseUser(username, 1);
+							await this.dbStorage.increaseUser(foundUser?.name, 1);
 							//TODO: new user typo event. (Should add event to DB and send message to webserver)
 							this.sendReaction(this.getRandomReaction().response, messageData);
 						}
@@ -238,7 +241,7 @@ export class DiscordService {
 		});
 	}
 
-	private async test(
+	private async parseResponse(
 		message: string,
 		username: string,
 		displayName: string,

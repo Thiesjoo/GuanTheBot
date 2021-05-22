@@ -22,7 +22,6 @@ const commands: Command[] = [
 			}
 			return;
 		},
-
 		description: "Add typo's to user",
 		options: [
 			{

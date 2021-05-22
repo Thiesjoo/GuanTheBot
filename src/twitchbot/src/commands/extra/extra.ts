@@ -75,7 +75,6 @@ const commands: Command[] = [
 				message,
 				userState,
 			);
-
 			return `${displayName} hugs ${
 				args.length > 1 ? fullArgs : taggedUsername
 			} <3 cjoet`;
