@@ -44,6 +44,14 @@ export class MockDatabase {
 		return true;
 	}
 
+	async fetchChannel() {
+		return undefined;
+	}
+
+	async setChannel() {
+		return;
+	}
+
 	//TODO: This is a very simple mock
 	async updateOne(
 		col: string,

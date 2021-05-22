@@ -79,7 +79,7 @@ export class DatabaseService {
 		return this.connection?.collection('config');
 	}
 
-	async getConfig(): Promise<{ discordChannelId?: string }> {
+	private async getConfig(): Promise<{ discordChannelId?: string }> {
 		return (await this.configCollection?.find({}).toArray())?.[0];
 	}
 
