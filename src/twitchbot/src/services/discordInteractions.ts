@@ -9,6 +9,7 @@ import {
 	Message,
 	NewsChannel,
 	TextChannel,
+	ThreadChannel,
 } from 'discord.js';
 import { DatabaseStorageService } from './storageService';
 import { DiscordCommands } from '../commands/index';
@@ -309,7 +310,7 @@ export class DiscordService {
 	private async sendReaction(
 		msg: string | Command,
 		channel: Message,
-	): Promise<any> {
+	): Promise<Message> {
 		if (typeof msg !== 'string') {
 			msg = await this.replaceVariables(msg);
 		}
@@ -319,8 +320,8 @@ export class DiscordService {
 
 	private async sendMessage(
 		msg: string | Command,
-		channel: TextChannel | DMChannel | NewsChannel,
-	): Promise<any> {
+		channel: TextChannel | DMChannel | NewsChannel | ThreadChannel,
+	): Promise<Message> {
 		if (typeof msg !== 'string') {
 			msg = await this.replaceVariables(msg);
 		}

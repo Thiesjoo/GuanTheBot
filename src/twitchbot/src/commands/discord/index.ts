@@ -20,7 +20,7 @@ const commands: Command[] = [
 			console.log(
 				storage.sendChannel,
 				firstArg,
-				discordService.client.channels.fetch(firstArg),
+				discordService.client.channels.fetch(firstArg as `${bigint}`),
 			);
 		},
 		description:
