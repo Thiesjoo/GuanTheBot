@@ -1,6 +1,6 @@
 ARG ALPINE_VERSION=3.12
-ARG NODE_VERSION=14.15.4
-ARG WORKINGDIR=src/twitchbot
+ARG NODE_VERSION=14.16.1
+ARG WORKINGDIR=.
 
 # Cached dependencies
 FROM node:${NODE_VERSION}-alpine${ALPINE_VERSION} as builder
@@ -9,9 +9,11 @@ ARG WORKINGDIR
 RUN apk add --no-cache git
 
 WORKDIR /usr/builder
-COPY . . 
+COPY ${WORKINGDIR}/package.json .
+COPY ${WORKINGDIR}/package-lock.json .
 RUN echo "Installing in: $WORKINGDIR"
 RUN cd "$WORKINGDIR" && npm ci 
+COPY . . 
 RUN cd "$WORKINGDIR" && npm run test
 RUN cd "$WORKINGDIR" && npm run build
 

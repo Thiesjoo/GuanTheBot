@@ -13,7 +13,7 @@ import {
 } from 'discord.js';
 import { DatabaseStorageService } from './storageService';
 import { DiscordCommands } from '../commands/index';
-import { Command } from '@mytypes/index';
+import { Command, CommandOptionType } from '@mytypes/index';
 import * as Mustache from 'mustache-async';
 import { parseCommand } from '../commands/parseCommands';
 
@@ -153,7 +153,9 @@ export class DiscordService {
 					return (
 						acc +
 						'"' +
-						(val.type === 'MENTIONABLE' ? `<@${val.value}>` : val.value) +
+						(val.type === CommandOptionType.MENTIONABLE
+							? `<@${val.value}>`
+							: val.value) +
 						'" '
 					);
 				}, '')}`;
