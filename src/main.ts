@@ -8,7 +8,7 @@ import { TwitchIRCService } from './services/twitchIRC';
 import { DiscordService } from '@services/discordInteractions';
 
 const envPropsArr: (string | string[])[] = [
-	['QOVERY_DATABASE_MY_MONGODB_CONNECTION_URI' || 'MONGO_URL'],
+	// ['QOVERY_DATABASE_MY_MONGODB_CONNECTION_URI' || 'MONGO_URL'  ],
 	'MONGO_DB',
 	'TMI_USER',
 	'TMI_KEY',
@@ -16,7 +16,7 @@ const envPropsArr: (string | string[])[] = [
 ];
 
 async function main() {
-	config({ path: '../../.env' }); //ENV is stored at root
+	config({ path: '.env' }); //ENV is stored at root
 
 	const env = Object.keys(process.env);
 	envPropsArr.forEach((x) => {
@@ -33,7 +33,7 @@ async function main() {
 		}
 	});
 
-	console.log('ENV VALIDATION SUCCESS');
+	console.log('ENV VALIDATION SUCCESS', process.env);
 
 	registerIOCContainer({});
 
