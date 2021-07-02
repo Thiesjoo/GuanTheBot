@@ -37,6 +37,7 @@ export class DatabaseService {
 		this.connection = (
 			await MongoClient.connect(this.config.mongoURL, {
 				useUnifiedTopology: true,
+				authSource: 'admin',
 			})
 		).db(this.config.mongoDB);
 	}

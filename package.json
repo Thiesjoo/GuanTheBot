@@ -7,7 +7,7 @@
 	"scripts": {
 		"start": "ts-node-dev --rs --respawn -P tsconfig.json -r tsconfig-paths/register src/main.ts",
 		"build": "rm -rf ./dist/ && tsc && tscpaths -p tsconfig.json -s . -o ./dist ",
-		"start:prod": "forever -MAX 4 dist/src/main.js",
+		"start:prod": "forever -m 4 dist/src/main.js",
 		"test": "jest"
 	},
 	"author": "",
