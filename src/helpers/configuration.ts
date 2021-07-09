@@ -16,7 +16,7 @@ export class ConfigService {
 		return (
 			process.env.MONGO_URL ||
 			process.env.QOVERY_DATABASE_MY_MONGODB_CONNECTION_URI ||
-			`mongodb://root:${process.env.QOVERY_DB_ZFAD4D02D_PASSWORD}@${process.env.QOVERY_DB_ZFAD4D02D_HOST}.qovery.io:${process.env.QOVERY_DB_ZFAD4D02D_PORT}` ||
+			`mongodb://${process.env.QOVERY_DB_ZFAD4D02D_LOGIN}:${process.env.QOVERY_DB_ZFAD4D02D_PASSWORD}@${process.env.QOVERY_DB_ZFAD4D02D_HOST}:${process.env.QOVERY_DB_ZFAD4D02D_PORT}` ||
 			''
 		);
 	}
